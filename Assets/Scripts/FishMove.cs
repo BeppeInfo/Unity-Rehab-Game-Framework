@@ -14,7 +14,7 @@ public class FishMove : MonoBehaviour
 	private Vector3 speed = Vector3.zero;
 
 	private Vector3 targetPosition  = Vector3.zero;
-	public Vector3 movementRange = Vector3.zero;
+	public Vector3 movementRange = new Vector3( 1.0f, 0.0f, 0.0f );
 
 	public Transform fish;
 
@@ -34,7 +34,8 @@ public class FishMove : MonoBehaviour
 	{
 		if( !isJumping ) 
 		{
-			//transform.position = Vector3.SmoothDamp( transform.position, targetPosition, ref speed, smoothInterval );
+			Debug.Log( transform.position.ToString() + targetPosition .ToString() );
+			transform.position = Vector3.SmoothDamp( transform.position, targetPosition, ref speed, smoothInterval );
 
 			if( Mathf.Abs( transform.position.x - targetPosition.x ) / movementRange.x < 0.1f )
 			{
@@ -66,6 +67,7 @@ public class FishMove : MonoBehaviour
 
 		fish.position = transform.position;
 		//fish.rotation = Quaternion.Euler( initialRotation.x, -speed.x * 10 + initialRotation.y, -rigidbody.velocity.y * 10.0f + initialRotation.z );
+		fish.localRotation = Quaternion.Euler( -rigidbody.velocity.y * 8.0f, Mathf.Clamp( -speed.x * 8.0f + initialRotation.y, 90.0f, 270.0f ), 0.0f );
 	}
 }
 

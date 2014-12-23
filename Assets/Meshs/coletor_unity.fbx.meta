@@ -47,6 +47,9 @@ ModelImporter:
     100082: UpperLeg.L
     100084: UpperLeg.R
     100086: UpperTeeth
+    100088: Fishing Rod
+    100090: Plane
+    100092: Sun
     400000: Basket
     400002: Bone
     400004: Character
@@ -91,22 +94,31 @@ ModelImporter:
     400082: UpperLeg.L
     400084: UpperLeg.R
     400086: UpperTeeth
+    400088: Fishing Rod
+    400090: Plane
+    400092: Sun
     2300000: Basket
     2300002: Eyes
     2300004: Hat
     2300006: TeethBottom
     2300008: TeethTop
+    2300010: Fishing Rod
+    2300012: Plane
     3300000: Basket
     3300002: Eyes
     3300004: Hat
     3300006: TeethBottom
     3300008: TeethTop
+    3300010: Fishing Rod
+    3300012: Plane
     4300000: TeethBottom
     4300002: TeethTop
     4300004: Basket
     4300006: Eyes
     4300008: Hat
     4300010: Character
+    4300012: Fishing Rod
+    4300014: Plane
     7400000: Haste
     7400002: Fail
     7400004: WalkLeft
@@ -118,6 +130,16 @@ ModelImporter:
     7400016: FarmerRig|Idle
     7400018: FarmerRig|WalkLeft
     7400020: FarmerRig|WalkRight
+    7400022: FarmerRig|Waiting
+    7400024: TeethTop|Waiting
+    7400026: FarmerRig|HatAction
+    7400028: Fishing Rod|HatAction
+    7400030: TeethBottom|HatAction
+    7400032: TeethTop|HatAction
+    7400034: Character|HatAction
+    7400036: Eyes|HatAction
+    7400038: Hat|HatAction
+    7400040: Hat|Waiting
     9500000: //RootNode
     11100000: //RootNode
     13700000: Character

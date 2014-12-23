@@ -63,15 +63,18 @@ public class LocalPlayer : MonoBehaviour
 		}
 	}
 
-	private Dictionary<string, AxisMotion> motionAxes = new Dictionary<string, AxisMotion>()
-															{
-																{ "X", new AxisMotion() },
-																{ "Y", new AxisMotion() },
-																{ "Z", new AxisMotion() },
-																{ "Roll", new AxisMotion() },
-																{ "Yaw", new AxisMotion() },
-																{ "Pitch", new AxisMotion() }
-															};
+	private string[] translationAxes = { "X", "Y", "Z" };
+	private string[] rotationAxes = { "Roll", "Yaw", "Pitch" };
+//	private Dictionary<string, AxisMotion> motionAxes = new Dictionary<string, AxisMotion>()
+//															{
+//																{ "X", new AxisMotion() },
+//																{ "Y", new AxisMotion() },
+//																{ "Z", new AxisMotion() },
+//																{ "Roll", new AxisMotion() },
+//																{ "Yaw", new AxisMotion() },
+//																{ "Pitch", new AxisMotion() }
+//															};
+	private List<AxisMotion> motionAxes = new List<AxisMotion>();
 
 	public Vector3 normalizedPosition = Vector3.zero;
 	public Vector3 normalizedRotation = Vector3.zero;
@@ -84,31 +87,36 @@ public class LocalPlayer : MonoBehaviour
 	void Start()
 	{
 		string playerName = gameObject.name;
-		foreach( string axisName in motionAxes.Keys )
+		List<string> axisIds = new List<string>( translationAxes );
+		axisIds.AddRange( rotationAxes );
+		for( int i = 0; i < axisIds.Count; i++ ) 
 		{
-			motionAxes[ axisName ].maxReach = PlayerPrefs.GetFloat( playerName + axisName + "Max", 0.0f );
-			motionAxes[ axisName ].minReach = PlayerPrefs.GetFloat( playerName + axisName + "Min", 0.0f );
-			if( PlayerPrefs.HasKey( playerName + axisName + "Var" ) )
+			motionAxes.Add( new AxisMotion() );
+			motionAxes[ i ].maxReach = PlayerPrefs.GetFloat( playerName + axisIds[ i ] + "Max", 0.0f );
+			motionAxes[ i ].minReach = PlayerPrefs.GetFloat( playerName + axisIds[ i ] + "Min", 0.0f );
+			if( PlayerPrefs.HasKey( playerName + axisIds[ i ] + "Var" ) )
 			{
-				motionAxes[ axisName ].variableName = PlayerPrefs.GetString( playerName + axisName + "Var" );
-				motionAxes[ axisName ].active = true;
+				motionAxes[ i ].variableName = PlayerPrefs.GetString( playerName + axisIds[ i ] + "Var" );
+				motionAxes[ i ].active = true;
 			}
-			Debug.Log( "LocalPlayer: Setting control axis: " + motionAxes[ axisName ].variableName + " -> " + playerName + axisName );
+			Debug.Log( "LocalPlayer: Setting control axis: " + motionAxes[ i ].variableName + " -> " + playerName + axisIds[ i ] );
 		}
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		normalizedPosition = 
-			new Vector3( motionAxes[ "X" ].Position, motionAxes[ "Y" ].Position, motionAxes[ "Z" ].Position );
-		normalizedSpeed = 
-			new Vector3( motionAxes[ "X" ].Speed, motionAxes[ "Y" ].Speed, motionAxes[ "Z" ].Speed );
+		for( int i = 0; i < translationAxes.Length; i++ )
+		{
+			normalizedPosition[ i ] = motionAxes[ i ].Position;
+			normalizedSpeed[ i ] = motionAxes[ i ].Speed;
+		}
 
-		normalizedRotation = 
-			new Vector3( motionAxes[ "Roll" ].Position, motionAxes[ "Yaw" ].Position, motionAxes[ "Pitch" ].Position );
-		normalizedAngularSpeed = 
-			new Vector3( motionAxes[ "Roll" ].Speed, motionAxes[ "Yaw" ].Speed, motionAxes[ "Pitch" ].Speed );
+		for( int i = 0; i < rotationAxes.Length; i++ )
+		{
+			normalizedRotation[ i ] = motionAxes[ i + translationAxes.Length ].Position;
+			normalizedAngularSpeed[ i ] = motionAxes[ i + translationAxes.Length ].Speed;
+		}
 	}
 
 	void OnCollisionEnter( Collision collisionInfo )
@@ -125,12 +133,11 @@ public class LocalPlayer : MonoBehaviour
 
 	public void FeedBack( Vector3 actualPosition, Vector3 actualRotation, Vector3 actualSpeed, Vector3 actualAngularSpeed )
 	{
-		motionAxes[ "X" ].Feedback( actualPosition.x, actualSpeed.x );
-		motionAxes[ "Y" ].Feedback( actualPosition.y, actualSpeed.y );
-		motionAxes[ "Z" ].Feedback( actualPosition.z, actualSpeed.z );
-		motionAxes[ "Roll" ].Feedback( actualRotation.x, actualAngularSpeed.x );
-		motionAxes[ "Yaw" ].Feedback( actualRotation.y, actualAngularSpeed.y );
-		motionAxes[ "Pitch" ].Feedback( actualRotation.z, actualAngularSpeed.z );
+		for( int i = 0; i < translationAxes.Length; i++ )
+			motionAxes[ i ].Feedback( actualPosition[ i ], actualSpeed[ i ] );
+
+		for( int i = 0; i < rotationAxes.Length; i++ )
+			motionAxes[ i + translationAxes.Length ].Feedback( actualRotation[ i ], actualAngularSpeed[ i ] );
 
 		Debug.Log( "LocalPlayer: Feedback for player " + gameObject.name );
 	}

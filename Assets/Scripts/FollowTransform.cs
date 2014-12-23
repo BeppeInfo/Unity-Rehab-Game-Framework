@@ -10,7 +10,8 @@ public class FollowTransform : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		initialPosition = transform.position;
+		Vector3 distance = target.position - transform.position;
+		initialPosition = transform.position + Vector3.Project( distance, transform.forward );
 	}
 	
 	// Update is called once per frame
