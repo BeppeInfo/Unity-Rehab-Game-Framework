@@ -34,7 +34,7 @@ public class Calibration : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		InputData axisValues = InputManager.GetAxisValues( controlAxis );
+		AxisData axisValues = InputManager.GetAxisValues( controlAxis );
 		currentAbsoluteValue = axisValues.position;
 		Debug.Log( "Calibration: " + controlAxis + " position: " + currentAbsoluteValue );
 

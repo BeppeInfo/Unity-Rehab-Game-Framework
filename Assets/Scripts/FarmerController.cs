@@ -13,13 +13,13 @@ public class FarmerController : MonoBehaviour {
 	// Update is called once per frame
 	void Update() 
 	{
-		float speed = -Vector3.Dot( rigidbody.velocity, transform.forward );
+		float speed = -Vector3.Dot( GetComponent<Rigidbody>().velocity, transform.forward );
 
 		if( speed > 1.0f )
-			animation.CrossFade( "WalkRight" );
+			GetComponent<Animation>().CrossFade( "WalkRight" );
 		else if( speed < -1.0f )
-			animation.CrossFade( "WalkLeft" );
+			GetComponent<Animation>().CrossFade( "WalkLeft" );
 		else
-			animation.CrossFade( "Idle" );
+			GetComponent<Animation>().CrossFade( "Idle" );
 	}
 }

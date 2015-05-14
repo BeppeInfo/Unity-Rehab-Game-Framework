@@ -34,7 +34,7 @@ public class FishMove : MonoBehaviour
 	{
 		if( !isJumping ) 
 		{
-			Debug.Log( transform.position.ToString() + targetPosition .ToString() );
+			//Debug.Log( transform.position.ToString() + targetPosition .ToString() );
 			transform.position = Vector3.SmoothDamp( transform.position, targetPosition, ref speed, smoothInterval );
 
 			if( Mathf.Abs( transform.position.x - targetPosition.x ) / movementRange.x < 0.1f )
@@ -46,9 +46,9 @@ public class FishMove : MonoBehaviour
 
 			if( Random.Range( 0, 500 ) == 0 )
 			{
-				rigidbody.isKinematic = false;
-				rigidbody.useGravity = true;
-				rigidbody.AddForce( new Vector3( speed.x, 10.0f, 0.0f ), ForceMode.VelocityChange );
+				GetComponent<Rigidbody>().isKinematic = false;
+				GetComponent<Rigidbody>().useGravity = true;
+				GetComponent<Rigidbody>().AddForce( new Vector3( speed.x, 10.0f, 0.0f ), ForceMode.VelocityChange );
 				isJumping = true;
 			} 
 		}
@@ -57,9 +57,9 @@ public class FishMove : MonoBehaviour
 			if( transform.position.y <= initialPosition.y - movementRange.y / 2.0f ) 
 			{
 				isJumping = false;
-				rigidbody.useGravity = false;
-				rigidbody.velocity = Vector3.zero;
-				rigidbody.isKinematic = true;
+				GetComponent<Rigidbody>().useGravity = false;
+				GetComponent<Rigidbody>().velocity = Vector3.zero;
+				GetComponent<Rigidbody>().isKinematic = true;
 				transform.position = new Vector3( transform.position.x, initialPosition.y, transform.position.z );
 				fish.rotation = Quaternion.Euler( initialRotation );
 			}
@@ -67,7 +67,7 @@ public class FishMove : MonoBehaviour
 
 		fish.position = transform.position;
 		//fish.rotation = Quaternion.Euler( initialRotation.x, -speed.x * 10 + initialRotation.y, -rigidbody.velocity.y * 10.0f + initialRotation.z );
-		fish.localRotation = Quaternion.Euler( -rigidbody.velocity.y * 8.0f, Mathf.Clamp( -speed.x * 8.0f + initialRotation.y, 90.0f, 270.0f ), 0.0f );
+		fish.localRotation = Quaternion.Euler( -GetComponent<Rigidbody>().velocity.y * 8.0f, Mathf.Clamp( -speed.x * 8.0f + initialRotation.y, 90.0f, 270.0f ), 0.0f );
 	}
 }
 

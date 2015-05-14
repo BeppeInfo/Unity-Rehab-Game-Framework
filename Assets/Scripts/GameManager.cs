@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour
 	// Use this for initialization
 	protected virtual void Start()
 	{
-		Screen.showCursor = false;
+		Cursor.visible = false;
 
 		mapScale = mapBoundingBox.bounds.size;
 		inverseMapScale = new Vector3( 1 / mapScale.x, 1 / mapScale.y, 1 / mapScale.z );
@@ -43,8 +43,8 @@ public class GameManager : MonoBehaviour
 			localPlayers.Add( playerName );
 			activeObjects[ playerName ] = new ObjectData();
 			activeObjects[ playerName ].handle = player;
-			activeObjects[ playerName ].initialPosition = player.rigidbody.position;
-			activeObjects[ playerName ].initialRotation = player.rigidbody.rotation.eulerAngles;
+			activeObjects[ playerName ].initialPosition = player.GetComponent<Rigidbody>().position;
+			activeObjects[ playerName ].initialRotation = player.GetComponent<Rigidbody>().rotation.eulerAngles;
 
 			Debug.Log( "Position: " + player.transform.position.ToString() );
 		}
@@ -85,31 +85,31 @@ public class GameManager : MonoBehaviour
 			ObjectData playerData = activeObjects[ playerName ];
 			LocalPlayer player = playerData.handle;
 
-			playerCurrentSpeed = player.transform.InverseTransformDirection( player.rigidbody.velocity );
+			playerCurrentSpeed = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().velocity );
 			playerNewSpeed = Vector3.Scale( player.normalizedSpeed, mapScale );
 			playerDeltaSpeed = new Vector3( 
 			                     ( float.IsNaN( playerNewSpeed.x ) ) ? 0.0f : playerNewSpeed.x - playerCurrentSpeed.x,
 			                     ( float.IsNaN( playerNewSpeed.y ) ) ? 0.0f : playerNewSpeed.y - playerCurrentSpeed.y,
 			                     ( float.IsNaN( playerNewSpeed.z ) ) ? 0.0f : playerNewSpeed.z - playerCurrentSpeed.z );
 
-			playerCurrentAngularSpeed = player.transform.InverseTransformDirection( player.rigidbody.angularVelocity );
+			playerCurrentAngularSpeed = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().angularVelocity );
 			playerNewAngularSpeed = player.normalizedAngularSpeed * 180.0f;
 			playerDeltaAngularSpeed = new Vector3( 
 			                            ( float.IsNaN( playerNewAngularSpeed.x ) ) ? 0.0f : playerNewAngularSpeed.x - playerCurrentAngularSpeed.x,
 			                            ( float.IsNaN( playerNewAngularSpeed.y ) ) ? 0.0f : playerNewAngularSpeed.y - playerCurrentAngularSpeed.y,
 			                            ( float.IsNaN( playerNewAngularSpeed.z ) ) ? 0.0f : playerNewAngularSpeed.z - playerCurrentAngularSpeed.z );
 
-			player.rigidbody.AddRelativeForce( playerDeltaSpeed, ForceMode.VelocityChange );
-			player.rigidbody.AddRelativeTorque( playerDeltaAngularSpeed, ForceMode.VelocityChange );
+			player.GetComponent<Rigidbody>().AddRelativeForce( playerDeltaSpeed, ForceMode.VelocityChange );
+			player.GetComponent<Rigidbody>().AddRelativeTorque( playerDeltaAngularSpeed, ForceMode.VelocityChange );
 
-			playerData.globalPosition = player.rigidbody.position;
-			playerData.globalRotation = player.rigidbody.rotation.eulerAngles;
+			playerData.globalPosition = player.GetComponent<Rigidbody>().position;
+			playerData.globalRotation = player.GetComponent<Rigidbody>().rotation.eulerAngles;
 
-			playerLocalPosition = player.transform.InverseTransformDirection( player.rigidbody.position - playerData.initialPosition );
-			playerLocalRotation = player.transform.InverseTransformDirection( player.rigidbody.rotation.eulerAngles - playerData.initialRotation );
+			playerLocalPosition = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().position - playerData.initialPosition );
+			playerLocalRotation = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().rotation.eulerAngles - playerData.initialRotation );
 
-			playerCurrentSpeed = player.transform.InverseTransformDirection( player.rigidbody.velocity );
-			playerCurrentAngularSpeed = player.transform.InverseTransformDirection( player.rigidbody.angularVelocity );
+			playerCurrentSpeed = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().velocity );
+			playerCurrentAngularSpeed = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().angularVelocity );
 
 			/*Debug.Log( "GameManager: " + playerName + " speed: " + player.normalizedPosition + 
 			          " -> " + playerLocalPosition.ToString() + 
@@ -226,7 +226,7 @@ public class GameManager : MonoBehaviour
 
 	protected virtual void OnDestroy()
 	{
-		Screen.showCursor = true;
+		Cursor.visible = true;
 		//ConnectionManager.GameClient.Disconnect();
 	}
 }

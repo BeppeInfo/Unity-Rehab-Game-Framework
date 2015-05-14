@@ -1,12 +1,17 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 
-public class InputData 
-{ 
+public class AxisData 
+{
 	public float position = 0.0f, velocity = 0.0f;
-	public float positionFeedback = 0.0f, velocityFeedback = 0.0f;
 	public float motionTime = Time.realtimeSinceStartup;
+
+	public AxisData( float initialPosition )
+	{
+		position = initialPosition;
+	}
 }
 
 public class InputManager : MonoBehaviour
@@ -15,49 +20,34 @@ public class InputManager : MonoBehaviour
 	private static int axisServerPort;
 	private static int axisClientPort;
 
-	private static List<string> mouseAxes = new List<string>() { "Mouse X", "Mouse Y" };
-	private static List<string> keyboardAxes = new List<string>() { "Horizontal", "Vertical" };
-
-	private static List<string> remoteAxes = new List<string>();
-
-	private static Dictionary<string, InputData> axisValues = new Dictionary<string, InputData>();
+	private static Dictionary<string, AxisData> mouseAxisValues = new Dictionary<string, AxisData>();
+	private static Dictionary<string, AxisData> keyboardAxisValues = new Dictionary<string, AxisData>();
+	private static Dictionary<string, AxisData> remoteAxisValues = new Dictionary<string, AxisData>();
 
 	void Start()
 	{
-		foreach( string axisName in mouseAxes )
-			axisValues[ axisName ] = new InputData();
-		foreach( string axisName in keyboardAxes )
-			axisValues[ axisName ] = new InputData();
-
-		axisValues[ "Mouse X" ].position = Input.mousePosition.x;
-		axisValues[ "Mouse Y" ].position = Input.mousePosition.y;
+		mouseAxisValues[ "Mouse X" ] = new AxisData( Input.mousePosition.x );
+		mouseAxisValues[ "Mouse Y" ] = new AxisData( Input.mousePosition.y );
+		keyboardAxisValues[ "Horizontal" ] = new AxisData( 0.0f );
+		keyboardAxisValues[ "Vertical" ] = new AxisData( 0.0f );
 
 		axisServerHost = PlayerPrefs.GetString( ConnectionManager.AXIS_SERVER_HOST_ID, ConnectionManager.LOCAL_SERVER_HOST );
 		axisServerPort = PlayerPrefs.GetInt( ConnectionManager.SERVER_PORT_ID, ConnectionManager.DEFAULT_SERVER_PORT );
 		axisClientPort = PlayerPrefs.GetInt( ConnectionManager.AXIS_CLIENT_PORT_ID, ConnectionManager.DEFAULT_AXIS_CLIENT_PORT );
 			
-		ConnectionManager.AxisClient.Connect( /*axisServerHost*/ConnectionManager.LOCAL_SERVER_HOST, axisServerPort, axisClientPort );				
-
-		ConnectionManager.AxisClient.SendString( "Axis Connect" );
+		ConnectionManager.AxisClient.Connect( axisServerHost, axisServerPort, axisClientPort );				
 
 		StartCoroutine( UpdateAxisValues() );
 	}
 
-	public void UseRemoteServer( bool enabled )
+	public void AddRemoteAxis( string axisID, float initialPosition )
 	{
-		if( enabled )
-		{
-			axisServerHost = PlayerPrefs.GetString( ConnectionManager.MASTER_SERVER_HOST_ID, ConnectionManager.LOCAL_SERVER_HOST );
-			Debug.Log( "Input Manager: enabling remote axes" );
-		} 
-		else
-		{
-			axisServerHost = ConnectionManager.LOCAL_SERVER_HOST;
-			Debug.Log( "Input Manager: disabling remote axes" );
-		}
+		remoteAxisValues[ axisID ] = new AxisData( initialPosition );
+	}
 
-		PlayerPrefs.SetString( ConnectionManager.AXIS_SERVER_HOST_ID, axisServerHost );
-		ConnectionManager.AxisClient.Connect( axisServerHost, axisServerPort );
+	public void RemoveRemoteAxis( string axisID )
+	{
+		remoteAxisValues.Remove( axisID );
 	}
 
 	private static IEnumerator UpdateAxisValues()
@@ -66,66 +56,66 @@ public class InputManager : MonoBehaviour
 		{
 			float elapsedTime = Time.deltaTime;
 
-			string[] axisData = ConnectionManager.AxisClient.QueryData( "Axis Data" );
-			if( axisData.Length >= 3 )
+			foreach( string axisName in mouseAxisValues.Keys )
 			{
-				for( int axisDataOffset = 0; axisDataOffset < axisData.Length - 2; axisDataOffset += 3 )
+				mouseAxisValues[ axisName ].velocity = Input.GetAxis( axisName ) / elapsedTime;
+				mouseAxisValues[ axisName ].position += mouseAxisValues[ axisName ].velocity * elapsedTime;
+				mouseAxisValues[ axisName ].motionTime = elapsedTime;
+			}
+
+			foreach( string axisName in keyboardAxisValues.Keys )
+			{
+				keyboardAxisValues[ axisName ].velocity = Input.GetAxis( axisName );
+				keyboardAxisValues[ axisName ].position += keyboardAxisValues[ axisName ].velocity * elapsedTime;
+				keyboardAxisValues[ axisName ].motionTime = elapsedTime;
+			}
+
+			string[] axesMessages = ConnectionManager.AxisClient.ReceiveString().Split( ':' );
+			foreach( string axisMessage in axesMessages )
+			{
+				string[] axisData = axisMessage.Trim().Split( ' ' );
+
+				string axisID = axisData[ 0 ];
+				if( remoteAxisValues.ContainsKey( axisID ) )
 				{
-					string axisName = axisData[ axisDataOffset ];
-					if( !mouseAxes.Contains( axisName ) && !keyboardAxes.Contains( axisName ) )
-					{
-						if( !axisValues.ContainsKey( axisName ) )
-						{
-							remoteAxes.Add( axisName );
-							axisValues[ axisName ] = new InputData();
-						}
-						float.TryParse( axisData[ axisDataOffset + 1 ], out axisValues[ axisName ].position );
-						float.TryParse( axisData[ axisDataOffset + 2 ], out axisValues[ axisName ].velocity );
-						axisValues[ axisName ].motionTime = Time.realtimeSinceStartup - axisValues[ axisName ].motionTime;
+					float.TryParse( axisData[ 1 ], out remoteAxisValues[ axisID ].position );
+					float.TryParse( axisData[ 2 ], out remoteAxisValues[ axisID ].velocity );
+					remoteAxisValues[ axisID ].motionTime = Time.realtimeSinceStartup - remoteAxisValues[ axisID ].motionTime;
 
-						string axisMessage = string.Format( "{0}:{1}:{2}", axisName, axisValues[ axisName ].position, axisValues[ axisName ].velocity );
-						Debug.Log( "InputManager: Receiving input from axis: " + axisMessage );
-
-						float positionFeedback = axisValues[ axisName ].positionFeedback + axisValues[ axisName ].velocityFeedback * elapsedTime;
-						Debug.Log( "InputManager: Sending Feedback: " + positionFeedback.ToString() );
-						ConnectionManager.AxisClient.SendString( string.Format( "Axis Feedback:{0}:{1}:{2}", axisName, 
-						                                                       (int) axisValues[ axisName ].positionFeedback, 
-						                                                       (int) axisValues[ axisName ].velocityFeedback ) );
-					}
+					Debug.Log( "InputManager: Receiving input from axis: " + axisMessage );
 				}
-			}
-
-			foreach( string axisName in mouseAxes )
-			{
-				axisValues[ axisName ].velocity = Input.GetAxis( axisName ) / elapsedTime;
-				axisValues[ axisName ].position += axisValues[ axisName ].velocity * elapsedTime;
-				axisValues[ axisName ].motionTime = elapsedTime;
-			}
-			foreach( string axisName in keyboardAxes )
-			{
-				axisValues[ axisName ].velocity = Input.GetAxis( axisName );
-				axisValues[ axisName ].position += axisValues[ axisName ].velocity * elapsedTime;
-				axisValues[ axisName ].motionTime = elapsedTime;
 			}
 
 			yield return null;
 		}
 	}
 
-	public static InputData GetAxisValues( string axisName )
+	public static float GetAxisSpeed( string axisID )
 	{
-		if( axisValues.ContainsKey( axisName ) )
-			return axisValues[ axisName ];
+		if( mouseAxisValues.ContainsKey( axisID ) )
+			return mouseAxisValues[ axisID ].velocity;
+		else if( keyboardAxisValues.ContainsKey( axisID ) )
+			return keyboardAxisValues[ axisID ].velocity;
+		else if( remoteAxisValues.ContainsKey( axisID ) )
+			return remoteAxisValues[ axisID ].velocity;
 		else
-			return new InputData();
+			return 0.0;
 	}
 
-	public static void SetAxisFeedback( string axisName, float positionFeedback, float velocityFeedback )
+	public static void SetAxisFeedback( string axisID, float[] setpoints )
 	{
-		if( axisValues.ContainsKey( axisName ) )
+		if( remoteAxisValues.ContainsKey( axisID ) )
 		{
-			axisValues[ axisName ].positionFeedback = positionFeedback;
-			axisValues[ axisName ].velocityFeedback = velocityFeedback;
+			StringBuilder axisMessageBuilder = new StringBuilder( axisID );
+
+			foreach( float setpoint in setpoints )
+			{
+				axisMessageBuilder.Append( ' ' );
+				axisMessageBuilder.Append( setpoint );
+			}
+
+			Debug.Log( "InputManager: Sending Feedback: " + axisMessageBuilder.ToString() );
+			ConnectionManager.AxisClient.SendString( axisMessageBuilder.ToString() );
 		}
 	}
 
