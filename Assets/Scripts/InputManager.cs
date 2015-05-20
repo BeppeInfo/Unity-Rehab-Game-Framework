@@ -1,12 +1,20 @@
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 public class AxisData 
 {
-	public float position = 0.0f, velocity = 0.0f;
+	public float position = 0.0f, velocity = 0.0f, acceleration = 0.0f;
+	public float maxPosition = 0.0f, maxVelocity = 0.0f, maxAcceleration = 0.0f;
+	public float minPosition = 0.0f, minVelocity = 0.0f, minAcceleration = 0.0f;
+	public float range = 1.0f;
+	public float error = 0.0f;
 	public float motionTime = Time.realtimeSinceStartup;
+
+	public float actualPosition = 0.0f, actualVelocity = 0.0f;
+	public float[] setpoints;
 
 	public AxisData( float initialPosition )
 	{
@@ -78,11 +86,38 @@ public class InputManager : MonoBehaviour
 				string axisID = axisData[ 0 ];
 				if( remoteAxisValues.ContainsKey( axisID ) )
 				{
-					float.TryParse( axisData[ 1 ], out remoteAxisValues[ axisID ].position );
-					float.TryParse( axisData[ 2 ], out remoteAxisValues[ axisID ].velocity );
-					remoteAxisValues[ axisID ].motionTime = Time.realtimeSinceStartup - remoteAxisValues[ axisID ].motionTime;
+					try
+					{
+						float position = float.Parse( axisData[ 1 ] );
+						float velocity = float.Parse( axisData[ 2 ] );
+						float acceleration = float.Parse( axisData[ 3 ] );
+
+						remoteAxisValues[ axisID ].error = Mathf.Abs( ( position - remoteAxisValues[ axisID ].position ) / remoteAxisValues[ axisID ].range );
+
+						float delay = ( Time.realtimeSinceStartup - remoteAxisValues[ axisID ].motionTime ) / 2;
+						remoteAxisValues[ axisID ].motionTime = Time.realtimeSinceStartup;
+						remoteAxisValues[ axisID ].position = position + velocity * delay + acceleration * delay * delay / 2;
+
+						remoteAxisValues[ axisID ].acceleration = acceleration;
+						remoteAxisValues[ axisID ].velocity = velocity;
+					}
+					catch( Exception e )
+					{
+						Debug.Log( e.ToString() );
+					}
 
 					Debug.Log( "InputManager: Receiving input from axis: " + axisMessage );
+
+					StringBuilder axisMessageBuilder = new StringBuilder( axisID );
+					
+					foreach( float setpoint in remoteAxisValues[ axisID ].setpoints )
+					{
+						axisMessageBuilder.Append( ' ' );
+						axisMessageBuilder.Append( setpoint );
+					}
+					
+					Debug.Log( "InputManager: Sending input feedback: " + axisMessageBuilder.ToString() );
+					ConnectionManager.AxisClient.SendString( axisMessageBuilder.ToString() );
 				}
 			}
 
@@ -97,7 +132,23 @@ public class InputManager : MonoBehaviour
 		else if( keyboardAxisValues.ContainsKey( axisID ) )
 			return keyboardAxisValues[ axisID ].velocity;
 		else if( remoteAxisValues.ContainsKey( axisID ) )
+		{
+			float deltaTime = Time.realtimeSinceStartup - remoteAxisValues[ axisID ].motionTime;
+			float deltaVelocity = remoteAxisValues[ axisID ].actualVelocity;
+			float targetPosition = remoteAxisValues[ axisID ].position + remoteAxisValues[ axisID ].velocity * deltaTime 
+				                   + remoteAxisValues[ axisID ].acceleration * deltaTime * deltaTime / 2;
+
+			targetPosition = Mathf.Clamp( targetPosition, remoteAxisValues[ axisID ].minPosition, remoteAxisValues[ axisID ].maxPosition );
+
+			/*if( remoteAxisValues[ axisID ].acceleration != 0.0 )
+			{
+				if( remoteAxisValues[ axisID ].velocity / remoteAxisValues[ axisID ].acceleration )
+					remoteAxisValues[ axisID ].velocity += remoteAxisValues[ axisID ].acceleration * deltaTime / 2
+			}*/
+
+
 			return remoteAxisValues[ axisID ].velocity;
+		}
 		else
 			return 0.0;
 	}
@@ -106,16 +157,12 @@ public class InputManager : MonoBehaviour
 	{
 		if( remoteAxisValues.ContainsKey( axisID ) )
 		{
-			StringBuilder axisMessageBuilder = new StringBuilder( axisID );
-
-			foreach( float setpoint in setpoints )
-			{
-				axisMessageBuilder.Append( ' ' );
-				axisMessageBuilder.Append( setpoint );
-			}
-
-			Debug.Log( "InputManager: Sending Feedback: " + axisMessageBuilder.ToString() );
-			ConnectionManager.AxisClient.SendString( axisMessageBuilder.ToString() );
+			if( setpoints[ 0 ] > remoteAxisValues[ axisID ].maxPosition ) remoteAxisValues[ axisID ].maxPosition = setpoints[ 0 ];
+			else if( setpoints[ 0 ] < remoteAxisValues[ axisID ].minPosition ) remoteAxisValues[ axisID ].minPosition = setpoints[ 0 ];
+			remoteAxisValues[ axisID ].range = remoteAxisValues[ axisID ].maxPosition - remoteAxisValues[ axisID ].minPosition;
+			remoteAxisValues[ axisID ].actualPosition = setpoints[ 0 ];
+			remoteAxisValues[ axisID ].setpoints = setpoints;
+			Debug.Log( "New setpoints for " + axisID + " " + setpoints.ToString() );
 		}
 	}
 
