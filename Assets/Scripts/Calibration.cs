@@ -34,8 +34,8 @@ public class Calibration : MonoBehaviour
 	// Update is called once per frame
 	void Update()
 	{
-		AxisData axisValues = InputManager.GetAxisValues( controlAxis );
-		currentAbsoluteValue = axisValues.position;
+		InputManager.CalibrateAxisSpeed( controlAxis );
+		currentAbsoluteValue = InputManager.GetAxisAbsolutePosition( controlAxis );
 		Debug.Log( "Calibration: " + controlAxis + " position: " + currentAbsoluteValue );
 
 		calibrationSlider.value = currentAbsoluteValue;
@@ -45,6 +45,7 @@ public class Calibration : MonoBehaviour
 
 	public void SetControl()
 	{
+		InputManager.CalibrateAxisPosition( controlAxis, calibrationSlider.minValue, calibrationSlider.maxValue );
 		controlAxis = PlayerPrefs.GetString( CONTROL_AXIS_ID );
 		Debug.Log( "Calibration: Setting control axis: " + controlAxis );
 		PlayerPrefs.SetString( motionAxisID + MOTION_AXIS_VARIABLE_SUFFIX, controlAxis );
@@ -101,7 +102,7 @@ public class Calibration : MonoBehaviour
 	void OnDestroy()
 	{
 		PlayerPrefs.DeleteKey( CONTROL_AXIS_ID );
-		PlayerPrefs.Save ();
+		PlayerPrefs.Save();
 	}
 }
 

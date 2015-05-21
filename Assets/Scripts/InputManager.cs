@@ -4,29 +4,29 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-public class AxisData 
-{
-	public float position = 0.0f, velocity = 0.0f, acceleration = 0.0f;
-	public float maxPosition = 0.0f, maxVelocity = 0.0f, maxAcceleration = 0.0f;
-	public float minPosition = 0.0f, minVelocity = 0.0f, minAcceleration = 0.0f;
-	public float range = 1.0f;
-	public float error = 0.0f;
-	public float motionTime = Time.realtimeSinceStartup;
-
-	public float actualPosition = 0.0f, actualVelocity = 0.0f;
-	public float[] setpoints;
-
-	public AxisData( float initialPosition )
-	{
-		position = initialPosition;
-	}
-}
-
 public class InputManager : MonoBehaviour
 {
 	public static string axisServerHost;
 	private static int axisServerPort;
 	private static int axisClientPort;
+
+	private class AxisData 
+	{
+		public float position = 0.0f, velocity = 0.0f, acceleration = 0.0f;
+		public float maxPosition = 0.0f, maxVelocity = 0.0f, maxAcceleration = 0.0f;
+		public float minPosition = 0.0f, minVelocity = 0.0f, minAcceleration = 0.0f;
+		public float range = 1.0f;
+		public float error = 0.0f;
+		public float motionTime = Time.realtimeSinceStartup;
+		
+		public float actualPosition = 0.0f, actualVelocity = 0.0f;
+		public List<float> setpoints = new List<float>();
+		
+		public AxisData( float initialPosition )
+		{
+			position = initialPosition;
+		}
+	}
 
 	private static Dictionary<string, AxisData> mouseAxisValues = new Dictionary<string, AxisData>();
 	private static Dictionary<string, AxisData> keyboardAxisValues = new Dictionary<string, AxisData>();
@@ -68,14 +68,14 @@ public class InputManager : MonoBehaviour
 			{
 				mouseAxisValues[ axisName ].velocity = Input.GetAxis( axisName ) / elapsedTime;
 				mouseAxisValues[ axisName ].position += mouseAxisValues[ axisName ].velocity * elapsedTime;
-				mouseAxisValues[ axisName ].motionTime = elapsedTime;
+				mouseAxisValues[ axisName ].motionTime = Time.realtimeSinceStartup;
 			}
 
 			foreach( string axisName in keyboardAxisValues.Keys )
 			{
 				keyboardAxisValues[ axisName ].velocity = Input.GetAxis( axisName );
 				keyboardAxisValues[ axisName ].position += keyboardAxisValues[ axisName ].velocity * elapsedTime;
-				keyboardAxisValues[ axisName ].motionTime = elapsedTime;
+				keyboardAxisValues[ axisName ].motionTime = Time.realtimeSinceStartup;
 			}
 
 			string[] axesMessages = ConnectionManager.AxisClient.ReceiveString().Split( ':' );
@@ -88,18 +88,18 @@ public class InputManager : MonoBehaviour
 				{
 					try
 					{
-						float position = float.Parse( axisData[ 1 ] );
-						float velocity = float.Parse( axisData[ 2 ] );
-						float acceleration = float.Parse( axisData[ 3 ] );
+						float receivedPosition = float.Parse( axisData[ 1 ] );
+						float receivedVelocity = float.Parse( axisData[ 2 ] );
+						float receivedAcceleration = float.Parse( axisData[ 3 ] );
 
-						remoteAxisValues[ axisID ].error = Mathf.Abs( ( position - remoteAxisValues[ axisID ].position ) / remoteAxisValues[ axisID ].range );
+						remoteAxisValues[ axisID ].error = Mathf.Abs( ( receivedPosition - remoteAxisValues[ axisID ].position ) / remoteAxisValues[ axisID ].range );
 
-						float delay = ( Time.realtimeSinceStartup - remoteAxisValues[ axisID ].motionTime ) / 2;
+						float delay = ( Time.realtimeSinceStartup - remoteAxisValues[ axisID ].motionTime ) / 2.0f;
 						remoteAxisValues[ axisID ].motionTime = Time.realtimeSinceStartup;
-						remoteAxisValues[ axisID ].position = position + velocity * delay + acceleration * delay * delay / 2;
+						remoteAxisValues[ axisID ].position = receivedPosition + receivedVelocity * delay + receivedAcceleration * delay * delay / 2.0f;
 
-						remoteAxisValues[ axisID ].acceleration = acceleration;
-						remoteAxisValues[ axisID ].velocity = velocity;
+						remoteAxisValues[ axisID ].acceleration = receivedAcceleration;
+						remoteAxisValues[ axisID ].velocity = receivedVelocity;
 					}
 					catch( Exception e )
 					{
@@ -128,41 +128,85 @@ public class InputManager : MonoBehaviour
 	public static float GetAxisSpeed( string axisID )
 	{
 		if( mouseAxisValues.ContainsKey( axisID ) )
-			return mouseAxisValues[ axisID ].velocity;
+			return ( 2 * mouseAxisValues[ axisID ].velocity / remoteAxisValues[ axisID ].range );
 		else if( keyboardAxisValues.ContainsKey( axisID ) )
-			return keyboardAxisValues[ axisID ].velocity;
+			return ( 2 * keyboardAxisValues[ axisID ].velocity / remoteAxisValues[ axisID ].range );
 		else if( remoteAxisValues.ContainsKey( axisID ) )
 		{
-			float deltaTime = Time.realtimeSinceStartup - remoteAxisValues[ axisID ].motionTime;
-			float deltaVelocity = remoteAxisValues[ axisID ].actualVelocity;
-			float targetPosition = remoteAxisValues[ axisID ].position + remoteAxisValues[ axisID ].velocity * deltaTime 
-				                   + remoteAxisValues[ axisID ].acceleration * deltaTime * deltaTime / 2;
+			AxisData remoteAxis = remoteAxisValues[ axisID ];
 
-			targetPosition = Mathf.Clamp( targetPosition, remoteAxisValues[ axisID ].minPosition, remoteAxisValues[ axisID ].maxPosition );
+			float deltaTime = Time.realtimeSinceStartup - remoteAxis.motionTime;
 
-			/*if( remoteAxisValues[ axisID ].acceleration != 0.0 )
-			{
-				if( remoteAxisValues[ axisID ].velocity / remoteAxisValues[ axisID ].acceleration )
-					remoteAxisValues[ axisID ].velocity += remoteAxisValues[ axisID ].acceleration * deltaTime / 2
-			}*/
+			float targetTolerance = 1 + remoteAxis.error;
 
+			float targetPosition = remoteAxis.position + remoteAxis.velocity * deltaTime + remoteAxis.acceleration * deltaTime * deltaTime / 2.0f;
+			targetPosition = Mathf.Clamp( targetPosition, remoteAxis.minPosition * targetTolerance, remoteAxis.maxPosition * targetTolerance );
 
-			return remoteAxisValues[ axisID ].velocity;
+			float targetVelocity = ( targetPosition - remoteAxis.actualPosition ) / deltaTime;
+			targetVelocity = Mathf.Clamp( targetVelocity, remoteAxis.minVelocity * targetTolerance, remoteAxis.maxVelocity * targetTolerance );
+
+			float targetAcceleration = ( targetVelocity - remoteAxis.actualVelocity ) / deltaTime;
+			targetAcceleration = Mathf.Clamp( targetAcceleration, remoteAxis.minAcceleration * targetTolerance, remoteAxis.maxAcceleration * targetTolerance );
+
+			targetVelocity = remoteAxisValues[ axisID ].actualVelocity + targetAcceleration * deltaTime;
+
+			return ( 2 * targetVelocity / remoteAxisValues[ axisID ].range );
 		}
 		else
-			return 0.0;
+			return 0.0f;
 	}
 
-	public static void SetAxisFeedback( string axisID, float[] setpoints )
+	public static float GetAxisAbsolutePosition( string axisID )
+	{
+		if( mouseAxisValues.ContainsKey( axisID ) )
+			return mouseAxisValues[ axisID ].position;
+		else if( keyboardAxisValues.ContainsKey( axisID ) )
+			return keyboardAxisValues[ axisID ].position;
+		else if( remoteAxisValues.ContainsKey( axisID ) )
+			return remoteAxisValues[ axisID ].position;
+
+		return 0.0f;
+	}
+
+	public static void CalibrateAxisSpeed( string axisID )
 	{
 		if( remoteAxisValues.ContainsKey( axisID ) )
 		{
-			if( setpoints[ 0 ] > remoteAxisValues[ axisID ].maxPosition ) remoteAxisValues[ axisID ].maxPosition = setpoints[ 0 ];
-			else if( setpoints[ 0 ] < remoteAxisValues[ axisID ].minPosition ) remoteAxisValues[ axisID ].minPosition = setpoints[ 0 ];
-			remoteAxisValues[ axisID ].range = remoteAxisValues[ axisID ].maxPosition - remoteAxisValues[ axisID ].minPosition;
-			remoteAxisValues[ axisID ].actualPosition = setpoints[ 0 ];
-			remoteAxisValues[ axisID ].setpoints = setpoints;
-			Debug.Log( "New setpoints for " + axisID + " " + setpoints.ToString() );
+			AxisData remoteAxis = remoteAxisValues[ axisID ];
+
+			if( remoteAxis.velocity > remoteAxis.maxVelocity ) remoteAxis.maxVelocity = remoteAxis.velocity;
+			else if( remoteAxis.velocity < remoteAxis.minVelocity ) remoteAxis.minVelocity = remoteAxis.velocity;
+
+			if( remoteAxis.acceleration > remoteAxis.maxAcceleration ) remoteAxis.maxAcceleration = remoteAxis.acceleration;
+			else if( remoteAxis.acceleration < remoteAxis.minAcceleration ) remoteAxis.minAcceleration = remoteAxis.acceleration;
+		}
+	}
+
+	public static void CalibrateAxisPosition( string axisID, float minPosition, float maxPosition )
+	{
+		if( remoteAxisValues.ContainsKey( axisID ) )
+		{
+			AxisData remoteAxis = remoteAxisValues[ axisID ];
+
+			remoteAxis.maxPosition = maxPosition;
+			remoteAxis.minPosition = minPosition;
+			remoteAxis.range = ( maxPosition - minPosition != 0.0f ) ? maxPosition - minPosition : 1.0f;
+		}
+	}
+
+	public static void SetAxisFeedback( string axisID, float actualVelocity, float[] setpoints )
+	{
+		if( remoteAxisValues.ContainsKey( axisID ) )
+		{
+			remoteAxisValues[ axisID ].actualVelocity = actualVelocity * remoteAxisValues[ axisID ].range / 2.0f;
+
+			remoteAxisValues[ axisID ].setpoints.Clear();
+			foreach( float setpoint in setpoints )
+				remoteAxisValues[ axisID ].setpoints.Add( ( setpoint + 1 ) * ( remoteAxisValues[ axisID ].range / 2.0f ) + remoteAxisValues[ axisID ].minPosition );
+
+			remoteAxisValues[ axisID ].actualPosition = remoteAxisValues[ axisID ].setpoints[ 0 ];
+
+			Debug.Log( "New setpoints for " + axisID + " " + setpoints.ToString() + " -> " + remoteAxisValues[ axisID ].setpoints.ToString() );
 		}
 	}
 
