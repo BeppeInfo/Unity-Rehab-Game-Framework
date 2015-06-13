@@ -8,7 +8,8 @@ public class InputManager : MonoBehaviour
 {
 	public static string axisServerHost;
 	private static int axisServerPort;
-	private static int axisClientPort;
+
+	private static float serverDispatchTime = 0.0f, clientReceiveTime = 0.0f;
 
 	private class AxisData 
 	{
@@ -40,10 +41,9 @@ public class InputManager : MonoBehaviour
 		keyboardAxisValues[ "Vertical" ] = new AxisData( 0.0f );
 
 		axisServerHost = PlayerPrefs.GetString( ConnectionManager.AXIS_SERVER_HOST_ID, ConnectionManager.LOCAL_SERVER_HOST );
-		axisServerPort = PlayerPrefs.GetInt( ConnectionManager.SERVER_PORT_ID, ConnectionManager.DEFAULT_SERVER_PORT );
-		axisClientPort = PlayerPrefs.GetInt( ConnectionManager.AXIS_CLIENT_PORT_ID, ConnectionManager.DEFAULT_AXIS_CLIENT_PORT );
+		axisServerPort = PlayerPrefs.GetInt( ConnectionManager.AXIS_SERVER_DATA_PORT_ID, ConnectionManager.DEFAULT_SERVER_PORT );
 			
-		ConnectionManager.AxisClient.Connect( axisServerHost, axisServerPort, axisClientPort );				
+		ConnectionManager.AxisClient.Connect( axisServerHost, axisServerPort );				
 
 		StartCoroutine( UpdateAxisValues() );
 	}
@@ -88,13 +88,20 @@ public class InputManager : MonoBehaviour
 				{
 					try
 					{
-						float receivedPosition = float.Parse( axisData[ 1 ] );
-						float receivedVelocity = float.Parse( axisData[ 2 ] );
-						float receivedAcceleration = float.Parse( axisData[ 3 ] );
+						// Network latency calculation based on the NTP protocol
+						float clientDispatchTime = float.Parse( axisData[ 1 ] );
+						float serverReceiveTime = float.Parse( axisData[ 2 ] );
+						serverDispatchTime = float.Parse( axisData[ 3 ] );
+						clientReceiveTime = Time.realtimeSinceStartup;
+
+						float delay = ( ( clientReceiveTime - clientDispatchTime ) - ( serverReceiveTime - serverDispatchTime ) ) / 2.0f;
+
+						float receivedPosition = float.Parse( axisData[ 4 ] );
+						float receivedVelocity = float.Parse( axisData[ 5 ] );
+						float receivedAcceleration = float.Parse( axisData[ 6 ] );
 
 						remoteAxisValues[ axisID ].error = Mathf.Abs( ( receivedPosition - remoteAxisValues[ axisID ].position ) / remoteAxisValues[ axisID ].range );
 
-						float delay = ( Time.realtimeSinceStartup - remoteAxisValues[ axisID ].motionTime ) / 2.0f;
 						remoteAxisValues[ axisID ].motionTime = Time.realtimeSinceStartup;
 						remoteAxisValues[ axisID ].position = receivedPosition + receivedVelocity * delay + receivedAcceleration * delay * delay / 2.0f;
 
@@ -107,17 +114,6 @@ public class InputManager : MonoBehaviour
 					}
 
 					Debug.Log( "InputManager: Receiving input from axis: " + axisMessage );
-
-					StringBuilder axisMessageBuilder = new StringBuilder( axisID );
-					
-					foreach( float setpoint in remoteAxisValues[ axisID ].setpoints )
-					{
-						axisMessageBuilder.Append( ' ' );
-						axisMessageBuilder.Append( setpoint );
-					}
-					
-					Debug.Log( "InputManager: Sending input feedback: " + axisMessageBuilder.ToString() );
-					ConnectionManager.AxisClient.SendString( axisMessageBuilder.ToString() );
 				}
 			}
 
@@ -194,19 +190,27 @@ public class InputManager : MonoBehaviour
 		}
 	}
 
-	public static void SetAxisFeedback( string axisID, float actualVelocity, float[] setpoints )
+	public static void SetAxisFeedback( string axisID, float actualPosition, float actualVelocity )
 	{
 		if( remoteAxisValues.ContainsKey( axisID ) )
 		{
 			remoteAxisValues[ axisID ].actualVelocity = actualVelocity * remoteAxisValues[ axisID ].range / 2.0f;
 
-			remoteAxisValues[ axisID ].setpoints.Clear();
-			foreach( float setpoint in setpoints )
-				remoteAxisValues[ axisID ].setpoints.Add( ( setpoint + 1 ) * ( remoteAxisValues[ axisID ].range / 2.0f ) + remoteAxisValues[ axisID ].minPosition );
+			remoteAxisValues[ axisID ].actualPosition = ( ( actualPosition + 1.0f ) * remoteAxisValues[ axisID ].range / 2.0f ) + remoteAxisValues[ axisID ].minPosition;
 
-			remoteAxisValues[ axisID ].actualPosition = remoteAxisValues[ axisID ].setpoints[ 0 ];
+			Debug.Log( "Feedback values updated for " + axisID + ": " + remoteAxisValues[ axisID ].actualPosition + " " + remoteAxisValues[ axisID ].actualVelocity );
+		}
+	}
 
-			Debug.Log( "New setpoints for " + axisID + " " + setpoints.ToString() + " -> " + remoteAxisValues[ axisID ].setpoints.ToString() );
+	public static void SetAxisSetpoint( string axisID, float setpointPosition, float setpointVelocity, float setpointReachTime )
+	{
+		if( remoteAxisValues.ContainsKey( axisID ) )
+		{
+			string axisMessage = string.Format( "{0} {1} {2} {3} {4} {5} {6}", axisID, serverDispatchTime, clientReceiveTime, 
+			                                   Time.realtimeSinceStartup, setpointPosition, setpointVelocity, setpointReachTime );
+
+			Debug.Log( "InputManager: Sending input setpoint: " + axisMessage );
+			ConnectionManager.AxisClient.SendString( axisMessage );
 		}
 	}
 

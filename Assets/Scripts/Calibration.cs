@@ -36,7 +36,7 @@ public class Calibration : MonoBehaviour
 	{
 		InputManager.CalibrateAxisSpeed( controlAxis );
 		currentAbsoluteValue = InputManager.GetAxisAbsolutePosition( controlAxis );
-		Debug.Log( "Calibration: " + controlAxis + " position: " + currentAbsoluteValue );
+		if( currentAbsoluteValue != 0.0f ) Debug.Log( "Calibration: " + controlAxis + " position: " + currentAbsoluteValue );
 
 		calibrationSlider.value = currentAbsoluteValue;
 

@@ -55,12 +55,11 @@ public class GameManager : MonoBehaviour
 
 			string gameInfo = PlayerPrefs.GetString( GAME_SERVER_ID );
 
-			string gameHost = PlayerPrefs.GetString( ConnectionManager.MASTER_SERVER_HOST_ID, ConnectionManager.LOCAL_SERVER_HOST ).Trim();
-			int gameClientPort = PlayerPrefs.GetInt( ConnectionManager.GAME_CLIENT_PORT_ID, ConnectionManager.DEFAULT_GAME_CLIENT_PORT );
+			string gameHost = PlayerPrefs.GetString( ConnectionManager.GAME_SERVER_HOST_ID, ConnectionManager.LOCAL_SERVER_HOST ).Trim();
 			int gameServerPort = 0;
 			if( int.TryParse( gameInfo.Substring( gameInfo.LastIndexOf( ':' ) + 1 ), out gameServerPort ) )
 			{
-				ConnectionManager.GameClient.Connect( gameHost, gameServerPort, gameClientPort );				
+				ConnectionManager.GameClient.Connect( gameHost, gameServerPort );				
 				StartCoroutine( UpdateServer() );
 				StartCoroutine( UpdateRemote() );
 			}

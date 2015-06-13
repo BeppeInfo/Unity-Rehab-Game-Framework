@@ -10,56 +10,18 @@ public class LocalPlayer : MonoBehaviour
 		public bool active = false;
 
 		public string variableName = "";
-		public float minReach = 0.0f, maxReach = 0.0f;
-
-		private float absolutePosition = 0.0f, oldPosition = 0.0f, absoluteSpeed = 0.0f;
-
-		public float motionTime;
-		
-		public float Position
-		{
-			get 
-			{
-				if( active ) absolutePosition = InputManager.GetAxisValues( variableName ).position;
-				if( Mathf.Approximately( maxReach - minReach, 0.0f ) )
-					return 0.0f;
-				else
-					return 2 * ( ( absolutePosition - minReach ) / ( maxReach - minReach ) ) - 1;
-			}
-		}
 		
 		public float Speed
 		{
 			get 
 			{
-				if( active ) //absoluteSpeed = InputManager.GetAxisValues( variableName ).velocity;
-				{
-					absoluteSpeed = ( InputManager.GetAxisValues( variableName ).position - oldPosition ) /
-															InputManager.GetAxisValues( variableName ).motionTime;
-					oldPosition = InputManager.GetAxisValues( variableName ).position;
-				}
-
-				if( Mathf.Approximately( maxReach - minReach, 0.0f ) )
-					return float.NaN;
-				else
-					return 2 * absoluteSpeed / ( maxReach - minReach );
+				return InputManager.GetAxisSpeed( variableName );
 			}
 		}
 
 		public void Feedback( float actualPosition, float actualSpeed )
 		{
-			absolutePosition = ( actualPosition + 1 ) * ( maxReach - minReach ) / 2 + minReach;
-			/*if( maxReach > minReach )
-				absolutePosition = Mathf.Clamp( absolutePosition, minReach, maxReach );
-			else
-				absolutePosition = Mathf.Clamp( absolutePosition, maxReach, minReach );*/
-
-			absoluteSpeed = actualSpeed * ( maxReach - minReach ) / 2;
-
-			/*Debug.Log( string.Format( "AxisMotion {0} Feedback: {1} -> {2} : {3} -> {4}", variableName,
-			                         actualPosition, absolutePosition, actualSpeed, absoluteSpeed ) );*/
-
-			if( active ) InputManager.SetAxisFeedback( variableName, absolutePosition, absoluteSpeed );
+			if( active ) InputManager.SetAxisFeedback( variableName, actualPosition, actualSpeed );
 		}
 	}
 
@@ -92,8 +54,8 @@ public class LocalPlayer : MonoBehaviour
 		for( int i = 0; i < axisIds.Count; i++ ) 
 		{
 			motionAxes.Add( new AxisMotion() );
-			motionAxes[ i ].maxReach = PlayerPrefs.GetFloat( playerName + axisIds[ i ] + "Max", 0.0f );
-			motionAxes[ i ].minReach = PlayerPrefs.GetFloat( playerName + axisIds[ i ] + "Min", 0.0f );
+			//motionAxes[ i ].maxReach = PlayerPrefs.GetFloat( playerName + axisIds[ i ] + "Max", 0.0f );
+			//motionAxes[ i ].minReach = PlayerPrefs.GetFloat( playerName + axisIds[ i ] + "Min", 0.0f );
 			if( PlayerPrefs.HasKey( playerName + axisIds[ i ] + "Var" ) )
 			{
 				motionAxes[ i ].variableName = PlayerPrefs.GetString( playerName + axisIds[ i ] + "Var" );
@@ -107,16 +69,10 @@ public class LocalPlayer : MonoBehaviour
 	void Update()
 	{
 		for( int i = 0; i < translationAxes.Length; i++ )
-		{
-			normalizedPosition[ i ] = motionAxes[ i ].Position;
 			normalizedSpeed[ i ] = motionAxes[ i ].Speed;
-		}
 
 		for( int i = 0; i < rotationAxes.Length; i++ )
-		{
-			normalizedRotation[ i ] = motionAxes[ i + translationAxes.Length ].Position;
 			normalizedAngularSpeed[ i ] = motionAxes[ i + translationAxes.Length ].Speed;
-		}
 	}
 
 	void OnCollisionEnter( Collision collisionInfo )

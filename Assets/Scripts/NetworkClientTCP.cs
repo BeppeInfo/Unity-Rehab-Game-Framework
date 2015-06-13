@@ -29,6 +29,8 @@ public class NetworkClientTCP : NetworkClient {
 			{
 				Array.Clear( inputBuffer, 0, inputBuffer.Length );
 				client.Receive( inputBuffer );
+
+				Debug.Log( "Received string: " + Encoding.ASCII.GetString( inputBuffer ) );
 			} 
 			catch( Exception e ) 
 			{

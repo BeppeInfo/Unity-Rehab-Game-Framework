@@ -19,7 +19,7 @@ public class CreateConnection : MonoBehaviour
 			string currentGameName = PlayerPrefs.GetString( serverNameId );
 
 			ConnectionManager.InfoClient.Connect( PlayerPrefs.GetString( gameInfo.infoHostId, ConnectionManager.LOCAL_SERVER_HOST ), 
-													PlayerPrefs.GetInt( ConnectionManager.SERVER_PORT_ID, ConnectionManager.DEFAULT_SERVER_PORT ) );
+													PlayerPrefs.GetInt( ConnectionManager.GAME_SERVER_INFO_PORT_ID, ConnectionManager.DEFAULT_SERVER_PORT ) );
 			ConnectionManager.InfoClient.SendString( gameInfo.infoType + " New:" + currentGameName );
 
 			gameInfo.RefreshServerInfo();
