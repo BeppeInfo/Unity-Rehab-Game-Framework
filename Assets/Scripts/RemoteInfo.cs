@@ -24,18 +24,17 @@ public class RemoteInfo : MonoBehaviour
 
 	IEnumerator ReceiveInfo()
 	{
-		while( Application.isPlaying ) 
-		{
-			string infoString = ConnectionManager.InfoClient.ReceiveString().Trim();
+		string infoString = "";
 
-			if( infoString != "" ) 
-			{
-				foreach( string info in infoString.Split( ':' ) )
-					SelectionList.stringLists[ valueType ].Add( info );
-			}
+		while( infoString == "" ) 
+		{
+			infoString = ConnectionManager.InfoClient.ReceiveString().Trim();
 
 			yield return null;
 		}
+
+		foreach( string info in infoString.Split( '|' ) )
+			SelectionList.stringLists[ valueType ].Add( info );
 	}
 
 	void OnDestroy()

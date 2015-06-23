@@ -15,7 +15,7 @@ public class LocalPlayer : MonoBehaviour
 		{
 			get 
 			{
-				return InputManager.GetAxisSpeed( variableName );
+				return InputManager.GetNormalizedAxisSpeed( variableName );
 			}
 		}
 

@@ -31,8 +31,8 @@ public class SelectionList : SelectionEntry
 		else
 			PlayerPrefs.SetString( valueType, "" );
 
-		if( valueDisplay )
-			valueDisplay.text = PlayerPrefs.GetString( valueType );
+		value = PlayerPrefs.GetString( valueType );
+		if( displayText ) displayText.text = value;
 	}
 	
 	public void PreviousValue()

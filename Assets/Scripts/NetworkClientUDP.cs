@@ -57,9 +57,9 @@ public class NetworkClientUDP : NetworkClient {
 
 					//try
 					//{
-						int bytesRead = client.Receive( inputBuffer );
+						/*int bytesRead =*/ client.Receive( inputBuffer );
 
-						Debug.Log( "Received " + bytesRead.ToString() + " bytes from : " + Encoding.ASCII.GetString( inputBuffer ) );
+						//Debug.Log( "Received " + bytesRead.ToString() + " bytes from : " + Encoding.ASCII.GetString( inputBuffer ) );
 					//}
 					//catch( SocketException e )
 					//{

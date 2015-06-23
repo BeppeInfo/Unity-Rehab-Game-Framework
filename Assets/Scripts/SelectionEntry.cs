@@ -6,25 +6,36 @@ using System.Collections.Generic;
 //[RequireComponent( typeof(Text) )]
 public class SelectionEntry : MonoBehaviour
 {
-	protected Text valueDisplay = null; 
+	public Text displayText = null; 
+	protected string value = "";
 
 	public string valueType = "";
 
 	protected virtual void Start()
 	{
-		valueDisplay = GetComponentInChildren<Text>();
+		//displayText = GetComponentInChildren<Text>();
 
-		if( valueDisplay )
+		if( displayText )
 		{
-			if( valueDisplay.text == "" )
-				valueDisplay.text = PlayerPrefs.GetString( valueType, "<vazio>" );
+			if( value == "" ) displayText.text = PlayerPrefs.GetString( valueType, "<empty>" );
 		}
 	}
 
-	public void SetStringValue()
+	public void SetDisplayText( string textString )
 	{
-		PlayerPrefs.SetString( valueType, valueDisplay.text );
+		if( displayText ) displayText.text = textString;
+	}
+
+	public void SetValue()
+	{
+		PlayerPrefs.SetString( valueType, value );
 		Debug.Log( valueType + ": " + PlayerPrefs.GetString( valueType ) );
+	}
+
+	public void SetStringValue( string valueString )
+	{
+		value = valueString;
+		SetValue();
 	}
 
 	public void ClearEntry()

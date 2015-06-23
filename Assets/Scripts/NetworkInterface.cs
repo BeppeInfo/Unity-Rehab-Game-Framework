@@ -37,9 +37,9 @@ public abstract class NetworkClient
 		{
 			Socket handle = (Socket) ar.AsyncState;
 			
-			int bytesSent = handle.EndSend( ar );
+			/*int bytesSent =*/ handle.EndSend( ar );
 			
-			Debug.Log( "Sent " + bytesSent.ToString() + " bytes: " + Encoding.ASCII.GetString( outputBuffer ) );
+			//Debug.Log( "Sent " + bytesSent.ToString() + " bytes: " + Encoding.ASCII.GetString( outputBuffer ) );
 		}
 		catch( Exception e ) 
 		{		
@@ -58,6 +58,8 @@ public abstract class NetworkClient
 
 				client.SetSocketOption( SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true );
 				client.ExclusiveAddressUse = false;
+				client.ReceiveBufferSize = BUFFER_SIZE;
+				client.SendBufferSize = BUFFER_SIZE;
 
 				/*if( !client.IsBound )
 				{

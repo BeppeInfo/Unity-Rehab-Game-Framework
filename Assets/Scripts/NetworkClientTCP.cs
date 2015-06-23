@@ -12,6 +12,7 @@ public class NetworkClientTCP : NetworkClient {
 		try 
 		{
 			client = new Socket( AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp );
+			client.ReceiveTimeout = 1000;
 		}
 		catch( Exception e ) 
 		{
@@ -28,19 +29,22 @@ public class NetworkClientTCP : NetworkClient {
 			try 
 			{
 				Array.Clear( inputBuffer, 0, inputBuffer.Length );
-				client.Receive( inputBuffer );
+				if( client.Available > 0 )
+				{
+				    client.Receive( inputBuffer );
 
-				Debug.Log( "Received string: " + Encoding.ASCII.GetString( inputBuffer ) );
+				    Debug.Log( "Received string: " + Encoding.ASCII.GetString( inputBuffer ) );
+
+					return Encoding.ASCII.GetString( inputBuffer );
+				}
 			} 
 			catch( Exception e ) 
 			{
 				Debug.Log( e.ToString () );
 			}
-			
-			return Encoding.ASCII.GetString( inputBuffer );
 		} 
-		else
-			return "";
+
+		return "";
 	}
 
 	public override string[] QueryData( string key )

@@ -40,13 +40,14 @@ public class Calibration : MonoBehaviour
 
 		calibrationSlider.value = currentAbsoluteValue;
 
-		axisValueDisplay.text = currentAbsoluteValue.ToString( "#0.###" );
+		axisValueDisplay.text = currentAbsoluteValue.ToString( "#0.###" ) + " / " + InputManager.GetAbsoluteAxisSpeed( controlAxis ).ToString( "#0.###" );
 	}
 
 	public void SetControl()
 	{
 		InputManager.CalibrateAxisPosition( controlAxis, calibrationSlider.minValue, calibrationSlider.maxValue );
 		controlAxis = PlayerPrefs.GetString( CONTROL_AXIS_ID );
+		InputManager.AddRemoteAxis( controlAxis, currentAbsoluteValue );
 		Debug.Log( "Calibration: Setting control axis: " + controlAxis );
 		PlayerPrefs.SetString( motionAxisID + MOTION_AXIS_VARIABLE_SUFFIX, controlAxis );
 	}

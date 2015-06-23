@@ -39,30 +39,29 @@ public class SelectionBox : SelectionList
 					GameObject.Destroy( entry.gameObject );
 				entryList.Clear();
 			
+				float buttonHeight = GetComponent<Mask>().rectTransform.rect.width / 8;
+				if( valuesList.Count() * buttonHeight > listBox.rect.height )
+					listBox.sizeDelta = new Vector2( 0.0f, ( valuesList.Count() + 1 ) * buttonHeight - listBox.rect.height );
+				
 				float listLength = 0.0f;
 				foreach( string stringValue in valuesList )
 				{
 					Button newEntry = (Button) Instantiate( entry );
-					newEntry.image.rectTransform.parent = listBox.transform;
+					newEntry.image.rectTransform.SetParent( listBox.transform );
 
-					float buttonHeight = GetComponent<Mask>().rectTransform.rect.width / 8;
-					newEntry.image.rectTransform.sizeDelta = 
-						new Vector2( listBox.rect.width - 20, buttonHeight );
+					newEntry.image.rectTransform.sizeDelta = new Vector2( listBox.rect.width - 20, buttonHeight );
 
 					listLength += buttonHeight;
 
-					newEntry.GetComponentInChildren<Text>().text = stringValue;
-
+					newEntry.GetComponent<SelectionEntry>().SetDisplayText( stringValue.Split( ':' )[ 1 ] );
+					newEntry.GetComponent<SelectionEntry>().SetStringValue( stringValue.Split( ':' )[ 0 ] );
 					newEntry.GetComponent<SelectionEntry>().valueType = valueType;
 
 					newEntry.onClick.AddListener( delegate { selectionEvent.Invoke(); } );
 				
 					entryList.Add( newEntry );
-				
-					if( listLength + buttonHeight > listBox.rect.height )
-						listBox.sizeDelta = new Vector2( 0.0f, listLength + buttonHeight - listBox.rect.height );
 
-					float entryPosition = -listLength + newEntry.image.rectTransform.rect.height * 0.5f;
+					float entryPosition = listBox.rect.height * 0.5f - listLength + newEntry.image.rectTransform.rect.height * 0.5f;
 					newEntry.image.rectTransform.anchoredPosition = new Vector2( 0.5f, entryPosition );
 				}
 
