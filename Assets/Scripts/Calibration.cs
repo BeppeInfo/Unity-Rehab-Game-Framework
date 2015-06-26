@@ -10,6 +10,8 @@ public class Calibration : MonoBehaviour
 
 	private float currentAbsoluteValue = 0.0f;
 
+	private float displacement = 0.0f;
+
 	private string motionAxisID = "";
 	private string controlAxis = "";
 
@@ -36,11 +38,17 @@ public class Calibration : MonoBehaviour
 	{
 		InputManager.CalibrateAxisSpeed( controlAxis );
 		currentAbsoluteValue = InputManager.GetAxisAbsolutePosition( controlAxis );
-		if( currentAbsoluteValue != 0.0f ) Debug.Log( "Calibration: " + controlAxis + " position: " + currentAbsoluteValue );
+		//if( currentAbsoluteValue != 0.0f ) Debug.Log( "Calibration: " + controlAxis + " position: " + currentAbsoluteValue );
 
 		calibrationSlider.value = currentAbsoluteValue;
 
-		axisValueDisplay.text = currentAbsoluteValue.ToString( "#0.###" ) + " / " + InputManager.GetAbsoluteAxisSpeed( controlAxis ).ToString( "#0.###" );
+		float currentAbsoluteDerivative = InputManager.GetAbsoluteAxisSpeed( controlAxis );
+		axisValueDisplay.text = currentAbsoluteValue.ToString( "+#0.000;-#0.000; #0.000" );// + " / " + currentAbsoluteDerivative.ToString( "+#0.000;-#0.000; #0.000" );
+
+		displacement += currentAbsoluteDerivative * Time.unscaledDeltaTime;
+		InputManager.SetAxisAbsoluteFeedback( controlAxis, displacement, currentAbsoluteDerivative );
+
+		//calibrationSlider.value = displacement;
 	}
 
 	public void SetControl()
@@ -50,6 +58,8 @@ public class Calibration : MonoBehaviour
 		InputManager.AddRemoteAxis( controlAxis, currentAbsoluteValue );
 		Debug.Log( "Calibration: Setting control axis: " + controlAxis );
 		PlayerPrefs.SetString( motionAxisID + MOTION_AXIS_VARIABLE_SUFFIX, controlAxis );
+
+		displacement = currentAbsoluteValue;
 	}
 
 	public void SetAxis()
@@ -91,6 +101,8 @@ public class Calibration : MonoBehaviour
 			calibrationSlider.minValue = PlayerPrefs.GetFloat( motionAxisID + MOTION_AXIS_MAX_SUFFIX, DEFAULT_AXIS_MAX );
 			calibrationSlider.maxValue = PlayerPrefs.GetFloat( motionAxisID + MOTION_AXIS_MIN_SUFFIX, DEFAULT_AXIS_MIN );
 		}
+
+		InputManager.CalibrateAxisPosition( controlAxis, calibrationSlider.minValue, calibrationSlider.maxValue );
 	}
 
 	public void Reset()

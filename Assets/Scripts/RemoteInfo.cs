@@ -33,6 +33,9 @@ public class RemoteInfo : MonoBehaviour
 			yield return null;
 		}
 
+		
+		ConnectionManager.InfoClient.SendString( "0 1 1" );
+
 		foreach( string info in infoString.Split( '|' ) )
 			SelectionList.stringLists[ valueType ].Add( info );
 	}

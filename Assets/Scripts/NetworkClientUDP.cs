@@ -97,15 +97,22 @@ public class NetworkClientUDP : NetworkClient {
 	{	
 		if( messageQueue.Count > 0 )
 		{
-			lock( searchLock )
+			try
 			{
-				string remoteMessage = messageQueue[ messageQueue.Count - 1 ];
-				messageQueue.RemoveAt( messageQueue.Count - 1 );
-				return remoteMessage;
+				lock( searchLock )
+				{
+					string remoteMessage = messageQueue[ messageQueue.Count - 1 ];
+					messageQueue.RemoveAt( messageQueue.Count - 1 );
+					return remoteMessage;
+				}
+			}
+			catch( Exception e ) 
+			{
+				Debug.Log( e.ToString() );
 			}
 		}
-		else
-			return "";
+
+		return "";
 	}
 
 	public override string[] QueryData( string key )
