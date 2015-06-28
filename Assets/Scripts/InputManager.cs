@@ -17,21 +17,6 @@ public class InputManager : MonoBehaviour
 	private static StreamWriter inputLog = new StreamWriter( "c:\\Users\\Adriano\\Documents\\input.txt", false );
 	private static StreamWriter trajectoryLog = new StreamWriter( "c:\\Users\\Adriano\\Documents\\trajectory.txt", false );
 
-	//Kalman Filter
-	private static float Q = 0.000001f;
-	private static float R = 0.01f;
-	private static float P = 1f, X = 0f, K;
-
-	private static float filterUpdate( float measurement )
-	{
-		K = (P + Q) / (P + Q + R);
-		P = R * (P + Q) / (R + P + Q);
-
-		X = X + (measurement - X) * K;
-
-		return X;
-	}
-
 	private class AxisData 
 	{
 		public float position = 0.0f, velocity = 0.0f, acceleration = 0.0f;
@@ -43,6 +28,9 @@ public class InputManager : MonoBehaviour
 		
 		public float actualPosition = 0.0f, actualVelocity = 0.0f;
 		public List<float> setpoints = new List<float>();
+
+		public float filteredPosition = 0.0f, filteredVelocity = 0.0f;
+		public float[] covariance = { 1, 0, 1 };
 		
 		public AxisData( float initialPosition )
 		{
@@ -141,10 +129,27 @@ public class InputManager : MonoBehaviour
 
 							remoteAxis.errorTolerance = 1.0f + Mathf.Abs( ( receivedPosition - remoteAxis.position ) / remoteAxis.range );
 
-							float updateTime = clientReceiveTime - remoteAxis.motionTime;
-							remoteAxis.motionTime = clientReceiveTime;
+							float updateTime = serverDispatchTime - remoteAxis.motionTime;
+							remoteAxis.motionTime = serverDispatchTime;
 
-							remoteAxis.position = receivedPosition + receivedVelocity * ( delay + updateTime );
+							remoteAxis.filteredPosition += remoteAxis.filteredVelocity * updateTime;
+
+							remoteAxis.covariance[ 0 ] += 2 * updateTime * remoteAxis.covariance[ 1 ] + updateTime * updateTime * remoteAxis.covariance[ 2 ] + 1.0f;
+							remoteAxis.covariance[ 1 ] += updateTime * remoteAxis.covariance[ 2 ]; 
+							remoteAxis.covariance[ 2 ] += 1.0f;
+
+							float positionError = receivedPosition - remoteAxis.filteredPosition;
+							float velocityError = receivedVelocity - remoteAxis.filteredVelocity;
+
+							float covarianceResidual = remoteAxis.covariance[ 0 ] + 1.0f;
+							float filterGain = remoteAxis.covariance[ 0 ] / covarianceResidual;
+
+							remoteAxis.filteredPosition += filterGain * positionError;
+							remoteAxis.filteredVelocity += filterGain * velocityError;
+
+							for( int i = 0; i < 3; i++ ) remoteAxis.covariance[ i ] -= filterGain * remoteAxis.covariance[ i ];
+
+							remoteAxis.position = receivedPosition + remoteAxis.filteredVelocity * ( delay + updateTime );
 
 							remoteAxis.velocity = ( remoteAxis.position - remoteAxis.actualPosition ) / updateTime;
 
@@ -159,8 +164,9 @@ public class InputManager : MonoBehaviour
 
 							Debug.Log( string.Format( "New position: {0} + {1} * ({2} + {3}) = {4}", receivedPosition, receivedVelocity, delay, updateTime, remoteAxis.position ) );
 
-							inputLog.WriteLine( "{0} {1} {2} {3} {4} {5} {6} {7}", remoteAxis.motionTime, delay, updateTime, 
-							                                                       receivedPosition, receivedVelocity, remoteAxis.position, remoteAxis.velocity, remoteAxis.actualPosition );
+							inputLog.WriteLine( "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}", remoteAxis.motionTime, delay, updateTime, 
+																                           receivedPosition, receivedVelocity, remoteAxis.filteredPosition, remoteAxis.filteredVelocity,
+																                           remoteAxis.position, remoteAxis.velocity, remoteAxis.actualPosition );
 						}
 						catch( Exception e )
 						{
