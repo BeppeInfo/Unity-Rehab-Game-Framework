@@ -53,9 +53,9 @@ public class SelectionBox : SelectionList
 
 					listLength += buttonHeight;
 
+					newEntry.GetComponent<SelectionEntry>().valueType = valueType;
 					newEntry.GetComponent<SelectionEntry>().SetDisplayText( stringValue.Split( ':' )[ 1 ] );
 					newEntry.GetComponent<SelectionEntry>().SetStringValue( stringValue.Split( ':' )[ 0 ] );
-					newEntry.GetComponent<SelectionEntry>().valueType = valueType;
 
 					newEntry.onClick.AddListener( delegate { selectionEvent.Invoke(); } );
 				

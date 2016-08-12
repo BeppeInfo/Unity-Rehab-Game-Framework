@@ -34,7 +34,7 @@ public class Calibration : MonoBehaviour
 	}
 	
 	// Update is called once per frame
-	void Update()
+	void FixedUpdate()
 	{
 		InputManager.CalibrateAxisSpeed( controlAxis );
 		currentAbsoluteValue = InputManager.GetAxisAbsolutePosition( controlAxis );
@@ -42,10 +42,12 @@ public class Calibration : MonoBehaviour
 
 		calibrationSlider.value = currentAbsoluteValue;
 
-		float currentAbsoluteDerivative = InputManager.GetAbsoluteAxisSpeed( controlAxis );
-		axisValueDisplay.text = currentAbsoluteValue.ToString( "+#0.000;-#0.000; #0.000" );// + " / " + currentAbsoluteDerivative.ToString( "+#0.000;-#0.000; #0.000" );
+		float currentAbsoluteDerivative = InputManager.GetAxisAbsoluteSpeed( controlAxis );
+		axisValueDisplay.text = /*currentAbsoluteValue*/displacement.ToString( "+#0.000;-#0.000; #0.000" ) + " / " + currentAbsoluteDerivative.ToString( "+#0.000;-#0.000; #0.000" );
 
-		displacement += currentAbsoluteDerivative * Time.unscaledDeltaTime;
+		displacement += currentAbsoluteDerivative * Time.fixedDeltaTime;
+		if( float.IsNaN( displacement ) || float.IsInfinity( displacement ) ) displacement = currentAbsoluteValue;
+
 		InputManager.SetAxisAbsoluteFeedback( controlAxis, displacement, currentAbsoluteDerivative );
 
 		//calibrationSlider.value = displacement;
@@ -53,11 +55,14 @@ public class Calibration : MonoBehaviour
 
 	public void SetControl()
 	{
-		InputManager.CalibrateAxisPosition( controlAxis, calibrationSlider.minValue, calibrationSlider.maxValue );
-		controlAxis = PlayerPrefs.GetString( CONTROL_AXIS_ID );
-		InputManager.AddRemoteAxis( controlAxis, currentAbsoluteValue );
-		Debug.Log( "Calibration: Setting control axis: " + controlAxis );
-		PlayerPrefs.SetString( motionAxisID + MOTION_AXIS_VARIABLE_SUFFIX, controlAxis );
+		//InputManager.CalibrateAxisPosition( controlAxis, calibrationSlider.minValue, calibrationSlider.maxValue );
+		if( PlayerPrefs.HasKey( CONTROL_AXIS_ID ) )
+		{
+			controlAxis = PlayerPrefs.GetString( CONTROL_AXIS_ID );
+			InputManager.AddRemoteAxis( controlAxis, currentAbsoluteValue );
+			Debug.Log( "Calibration: Setting control axis: " + controlAxis );
+			PlayerPrefs.SetString( motionAxisID + MOTION_AXIS_VARIABLE_SUFFIX, controlAxis );
+		}
 
 		displacement = currentAbsoluteValue;
 	}

@@ -7,7 +7,7 @@ public class GameplayManager : GameManager
 	public Slider fishPositionSlider, rodPositionSlider, distanceSlider;
 
 	public FishMove fishController;
-	public LocalPlayer rodController;
+	public NetworkPlayer rodController;
 
 	float fishDistance;
 	Image distanceBar;
@@ -35,7 +35,7 @@ public class GameplayManager : GameManager
 		base.FixedUpdate();
 
 		fishPositionSlider.value = fishController.transform.position.x / mapScale.x;
-		rodPositionSlider.value = rodController.normalizedPosition.x;
+		rodPositionSlider.value = rodController.currentPosition.x;
 
 		fishDistance = fishController.transform.position.z - mapBoundingBox.bounds.min.z;
 

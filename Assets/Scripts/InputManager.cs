@@ -17,8 +17,9 @@ public class InputManager : MonoBehaviour
 	private static StreamWriter inputLog = new StreamWriter( "c:\\Users\\Adriano\\Documents\\input.txt", false );
 	private static StreamWriter trajectoryLog = new StreamWriter( "c:\\Users\\Adriano\\Documents\\trajectory.txt", false );
 
-	private class AxisData 
+	private class InputAxis 
 	{
+		public string ID = "";
 		public float position = 0.0f, velocity = 0.0f, acceleration = 0.0f;
 		public float maxPosition = 0.0f, maxVelocity = 0.0f, maxAcceleration = 0.0f;
 		public float minPosition = 0.0f, minVelocity = 0.0f, minAcceleration = 0.0f;
@@ -26,28 +27,50 @@ public class InputManager : MonoBehaviour
 		public float errorTolerance = 0.0f;
 		public float motionTime = Time.realtimeSinceStartup;
 		
-		public float actualPosition = 0.0f, actualVelocity = 0.0f;
-		public List<float> setpoints = new List<float>();
-
-		public float filteredPosition = 0.0f, filteredVelocity = 0.0f;
-		public float[] covariance = { 1, 0, 1 };
+		public float feedbackPosition = 0.0f;
 		
-		public AxisData( float initialPosition )
+		public InputAxis( string axisID = "", float initialPosition = 0.0f )
 		{
+			ID = axisID;
 			position = initialPosition;
+		}
+
+		public virtual void Update( float updateTime )
+		{
+			position += velocity * updateTime;
 		}
 	}
 
-	private static Dictionary<string, AxisData> mouseAxisValues = new Dictionary<string, AxisData>();
-	private static Dictionary<string, AxisData> keyboardAxisValues = new Dictionary<string, AxisData>();
-	private static Dictionary<string, AxisData> remoteAxisValues = new Dictionary<string, AxisData>();
+	private class MouseInputAxis : InputAxis
+	{
+		public MouseInputAxis( string axisID = "Mouse X", float initialPosition = 0.0f ) : base( axisID, initialPosition ) { }
+
+		public override void Update( float updateTime )
+		{
+			velocity = Input.GetAxis( ID ) / updateTime;
+			base.Update( updateTime );
+		}
+	}
+
+	private class KeyboardInputAxis : InputAxis
+	{
+		public KeyboardInputAxis( string axisID = "Horizontal", float initialPosition = 0.0f ) : base( axisID, initialPosition ) { }
+
+		public override void Update( float updateTime )
+		{
+			velocity = Input.GetAxis( ID );
+			base.Update( updateTime );
+		}
+	}
+
+	private static List<InputAxis> inputAxesValues = new List<InputAxis>();
 
 	void Start()
 	{
-		mouseAxisValues[ "Mouse X" ] = new AxisData( Input.mousePosition.x );
-		mouseAxisValues[ "Mouse Y" ] = new AxisData( Input.mousePosition.y );
-		keyboardAxisValues[ "Horizontal" ] = new AxisData( 0.0f );
-		keyboardAxisValues[ "Vertical" ] = new AxisData( 0.0f );
+		inputAxesValues.Add( new MouseInputAxis( "Mouse X", Input.mousePosition.x ) );
+		inputAxesValues.Add( new MouseInputAxis( "Mouse Y", Input.mousePosition.y ) );
+		inputAxesValues.Add( new KeyboardInputAxis( "Horizontal" ) );
+		inputAxesValues.Add( new KeyboardInputAxis( "Vertical" ) );
 
 		axisServerHost = PlayerPrefs.GetString( ConnectionManager.AXIS_SERVER_HOST_ID, ConnectionManager.LOCAL_SERVER_HOST );
 		//axisServerPort = PlayerPrefs.GetInt( ConnectionManager.AXIS_SERVER_DATA_PORT_ID, DEFAULT_AXIS_SERVER_PORT );
@@ -59,38 +82,24 @@ public class InputManager : MonoBehaviour
 
 	public static void AddRemoteAxis( string axisID, float initialPosition )
 	{
-		if( !remoteAxisValues.ContainsKey( axisID ) || !mouseAxisValues.ContainsKey( axisID ) || !keyboardAxisValues.ContainsKey( axisID ) )
+		if( !inputAxesValues.Exists( axis => axis.ID == axisID ) )
 		{
-			remoteAxisValues[ axisID ] = new AxisData( initialPosition );
+			inputAxesValues.Add( new InputAxis( axisID, initialPosition ) );
 			SetAxisSetpoint( axisID, 0.0f, 0.0f, 1.0f );
 		}
 	}
 
 	public static void RemoveRemoteAxis( string axisID )
 	{
-		if( remoteAxisValues.ContainsKey( axisID ) )
-			remoteAxisValues.Remove( axisID );
+		inputAxesValues.Remove( inputAxesValues.Find( axis => axis.ID == axisID ) );
 	}
 
 	private static IEnumerator UpdateAxisValues()
 	{
 		while( Application.isPlaying )
 		{
-			float elapsedTime = Time.deltaTime;
-
-			foreach( string axisName in mouseAxisValues.Keys )
-			{
-				mouseAxisValues[ axisName ].velocity = Input.GetAxis( axisName ) / elapsedTime;
-				mouseAxisValues[ axisName ].position += mouseAxisValues[ axisName ].velocity * elapsedTime;
-				mouseAxisValues[ axisName ].motionTime = Time.realtimeSinceStartup;
-			}
-
-			foreach( string axisName in keyboardAxisValues.Keys )
-			{
-				keyboardAxisValues[ axisName ].velocity = Input.GetAxis( axisName );
-				keyboardAxisValues[ axisName ].position += keyboardAxisValues[ axisName ].velocity * elapsedTime;
-				keyboardAxisValues[ axisName ].motionTime = Time.realtimeSinceStartup;
-			}
+			foreach( InputAxis inputAxis in inputAxesValues )
+				inputAxis.Update( Time.fixedDeltaTime );
 
 			string[] messageData = ConnectionManager.AxisClient.ReceiveString().Split( '|' );
 			if( messageData.Length >= 2 )
@@ -103,10 +112,10 @@ public class InputManager : MonoBehaviour
 				serverDispatchTime = float.Parse( timeData[ 2 ] );
 				clientReceiveTime = Time.realtimeSinceStartup;
 				
-				float delay = ( ( clientReceiveTime - clientDispatchTime ) - ( serverReceiveTime - serverDispatchTime ) ) / 2.0f;
+				float delay = ( ( clientReceiveTime - clientDispatchTime ) - ( serverReceiveTime - serverDispatchTime ) ) / 2.0f + 0.1f;
 				if( delay < 0.0f ) delay = 0.0f;
 				
-				//Debug.Log( string.Format( "latency: ( ({0} - {1}) - ({2} - {3}) ) / 2 = {4}", clientReceiveTime, clientDispatchTime, serverReceiveTime, serverDispatchTime, delay ) );
+				Debug.Log( string.Format( "latency: ( ({0} - {1}) - ({2} - {3}) ) / 2 = {4}", clientReceiveTime, clientDispatchTime, serverReceiveTime, serverDispatchTime, delay ) );
 				
 				string[] axesMessages = messageData[ 1 ].Split( ':' );
 				foreach( string axisMessage in axesMessages )
@@ -114,59 +123,51 @@ public class InputManager : MonoBehaviour
 					string[] axisData = axisMessage.Trim().Split( ' ' );
 
 					string axisID = axisData[ 0 ];
-					if( remoteAxisValues.ContainsKey( axisID ) )
+
+					if( inputAxesValues.Exists( axis => axis.ID == axisID ) )
 					{
-						AxisData remoteAxis = remoteAxisValues[ axisID ];
+						InputAxis remoteAxis = inputAxesValues.Find( axis => axis.ID == axisID );
 
 						try
 						{
 							float receivedPosition = float.Parse( axisData[ 1 ] );
 							float receivedVelocity = float.Parse( axisData[ 2 ] );
+							float receivedAcceleration = float.Parse( axisData[ 3 ] );
 
-							/*float receivedTorque = float.Parse( axisData[ 3 ] );
-							float receivedStiffness = float.Parse( axisData[ 4 ] );
-							float receivedDamping = float.Parse( axisData[ 5 ] );*/
+							/*float receivedTorque = float.Parse( axisData[ 4 ] );
+							float receivedStiffness = float.Parse( axisData[ 5 ] );
+							float receivedDamping = float.Parse( axisData[ 6 ] );*/
 
 							remoteAxis.errorTolerance = 1.0f + Mathf.Abs( ( receivedPosition - remoteAxis.position ) / remoteAxis.range );
 
 							float updateTime = serverDispatchTime - remoteAxis.motionTime;
 							remoteAxis.motionTime = serverDispatchTime;
 
-							remoteAxis.filteredPosition += remoteAxis.filteredVelocity * updateTime;
+							if( updateTime > 0.0f ) 
+							{
+								remoteAxis.position = receivedPosition + receivedVelocity * delay + receivedAcceleration * delay * delay / 2.0f;
 
-							remoteAxis.covariance[ 0 ] += 2 * updateTime * remoteAxis.covariance[ 1 ] + updateTime * updateTime * remoteAxis.covariance[ 2 ] + 1.0f;
-							remoteAxis.covariance[ 1 ] += updateTime * remoteAxis.covariance[ 2 ]; 
-							remoteAxis.covariance[ 2 ] += 1.0f;
+								float predictedPosition = remoteAxis.position + ( receivedVelocity + receivedAcceleration * delay ) * updateTime;
 
-							float positionError = receivedPosition - remoteAxis.filteredPosition;
-							float velocityError = receivedVelocity - remoteAxis.filteredVelocity;
+								remoteAxis.velocity = ( predictedPosition - remoteAxis.feedbackPosition ) / updateTime;
 
-							float covarianceResidual = remoteAxis.covariance[ 0 ] + 1.0f;
-							float filterGain = remoteAxis.covariance[ 0 ] / covarianceResidual;
+								if( float.IsNaN( remoteAxis.velocity ) || float.IsInfinity( remoteAxis.velocity ) ) remoteAxis.velocity = 0.0f;
 
-							remoteAxis.filteredPosition += filterGain * positionError;
-							remoteAxis.filteredVelocity += filterGain * velocityError;
+								//remoteAxis.velocity = Mathf.Clamp( remoteAxis.velocity, remoteAxis.minVelocity * targetTolerance, remoteAxis.maxVelocity * targetTolerance );
+								
+								/*float targetAcceleration = ( remoteAxis.velocity - remoteAxis.actualVelocity ) / delay;
+								targetAcceleration = Mathf.Clamp( targetAcceleration, remoteAxis.minAcceleration * targetTolerance, remoteAxis.maxAcceleration * targetTolerance );
 
-							for( int i = 0; i < 3; i++ ) remoteAxis.covariance[ i ] -= filterGain * remoteAxis.covariance[ i ];
+								remoteAxis.velocity = remoteAxis.actualVelocity + targetAcceleration * delay;*/
 
-							remoteAxis.position = receivedPosition + remoteAxis.filteredVelocity * ( delay + updateTime );
+								SetAxisSetpoint( axisID, 0.0f, 0.0f, 1.0f );
 
-							remoteAxis.velocity = ( remoteAxis.position - remoteAxis.actualPosition ) / updateTime;
+								//Debug.Log( string.Format( "New position: {0} + {1} * ({2} + {3}) = {4}", receivedPosition, receivedVelocity, delay, updateTime, remoteAxis.position ) );
 
-							//remoteAxis.velocity = Mathf.Clamp( remoteAxis.velocity, remoteAxis.minVelocity * targetTolerance, remoteAxis.maxVelocity * targetTolerance );
-							
-							/*float targetAcceleration = ( remoteAxis.velocity - remoteAxis.actualVelocity ) / delay;
-							targetAcceleration = Mathf.Clamp( targetAcceleration, remoteAxis.minAcceleration * targetTolerance, remoteAxis.maxAcceleration * targetTolerance );
-
-							remoteAxis.velocity = remoteAxis.actualVelocity + targetAcceleration * delay;*/
-
-							SetAxisSetpoint( axisID, 0.0f, 0.0f, 1.0f );
-
-							Debug.Log( string.Format( "New position: {0} + {1} * ({2} + {3}) = {4}", receivedPosition, receivedVelocity, delay, updateTime, remoteAxis.position ) );
-
-							inputLog.WriteLine( "{0} {1} {2} {3} {4} {5} {6} {7} {8} {9}", remoteAxis.motionTime, delay, updateTime, 
-																                           receivedPosition, receivedVelocity, remoteAxis.filteredPosition, remoteAxis.filteredVelocity,
-																                           remoteAxis.position, remoteAxis.velocity, remoteAxis.actualPosition );
+								inputLog.WriteLine( "{0} {1} {2} {3} {4} {5} {6} {7}", remoteAxis.motionTime, delay, updateTime, 
+																	                   receivedPosition, receivedVelocity,
+																	                   remoteAxis.position, remoteAxis.velocity, remoteAxis.feedbackPosition );
+							}
 						}
 						catch( Exception e )
 						{
@@ -182,107 +183,115 @@ public class InputManager : MonoBehaviour
 		}
 	}
 	
-	public static float GetAbsoluteAxisSpeed( string axisID )
+	public static float GetAxisAbsoluteSpeed( string axisID )
 	{
-		if( mouseAxisValues.ContainsKey( axisID ) ) return mouseAxisValues[ axisID ].velocity;
-		else if( keyboardAxisValues.ContainsKey( axisID ) )	return keyboardAxisValues[ axisID ].velocity;
-		else if( remoteAxisValues.ContainsKey( axisID ) )
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) )
 		{
-			AxisData remoteAxis = remoteAxisValues[ axisID ];
+			InputAxis inputAxis = inputAxesValues.Find( axis => axis.ID == axisID );
 
-			float deltaTime = Time.realtimeSinceStartup - remoteAxis.motionTime;
-
-			if( remoteAxis.position > remoteAxis.maxPosition * remoteAxis.errorTolerance || remoteAxis.position < remoteAxis.minPosition * remoteAxis.errorTolerance )
-				remoteAxis.velocity -= 0.1f * remoteAxis.velocity * deltaTime;
-
-			//remoteAxis.actualPosition += remoteAxis.velocity * deltaTime;
-
-			try
+			if( inputAxis.ID == "0" )
 			{
-				trajectoryLog.WriteLine( "{0} {1} {2}", Time.realtimeSinceStartup, remoteAxis.actualPosition, remoteAxis.velocity );
-			}
-			catch( Exception e )
-			{
-				Debug.Log( e.ToString() );
+				try
+				{
+					trajectoryLog.WriteLine( "{0} {1} {2}", Time.realtimeSinceStartup, inputAxis.feedbackPosition, inputAxis.velocity );
+				}
+				catch( Exception e )
+				{
+					Debug.Log( e.ToString() );
+				}
 			}
 
-			return remoteAxis.velocity;
+			return inputAxis.velocity;
 		}
-		else
-			return 0.0f;
+			
+		return 0.0f;
 	}
 
-	public static float GetNormalizedAxisSpeed( string axisID )
+	public static float GetAxisNormalizedSpeed( string axisID )
 	{
-		float absoluteSpeed = GetAbsoluteAxisSpeed( axisID );
+		float absoluteSpeed = GetAxisAbsoluteSpeed( axisID );
 
-		if( mouseAxisValues.ContainsKey( axisID ) )
-			return ( 2 * absoluteSpeed / mouseAxisValues[ axisID ].range );
-		else if( keyboardAxisValues.ContainsKey( axisID ) )
-			return ( 2 * absoluteSpeed / keyboardAxisValues[ axisID ].range );
-		else if( remoteAxisValues.ContainsKey( axisID ) )
-			return ( 2 * absoluteSpeed / remoteAxisValues[ axisID ].range );
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) ) 
+		{
+			InputAxis inputAxis = inputAxesValues.Find( axis => axis.ID == axisID );
+
+			return ( 2 * absoluteSpeed / inputAxis.range );
+		}
 
 		return 0.0f;
 	}
 
 	public static float GetAxisAbsolutePosition( string axisID )
 	{
-		if( mouseAxisValues.ContainsKey( axisID ) )
-			return mouseAxisValues[ axisID ].position;
-		else if( keyboardAxisValues.ContainsKey( axisID ) )
-			return keyboardAxisValues[ axisID ].position;
-		else if( remoteAxisValues.ContainsKey( axisID ) )
-			return remoteAxisValues[ axisID ].position;
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) ) 
+		{
+			InputAxis inputAxis = inputAxesValues.Find( axis => axis.ID == axisID );
+			
+			return inputAxis.position;
+		}
 
+		return 0.0f;
+	}
+
+	public static float GetAxisNormalizedPosition( string axisID )
+	{
+		float absolutePosition = GetAxisAbsolutePosition( axisID );
+
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) ) 
+		{
+			InputAxis inputAxis = inputAxesValues.Find( axis => axis.ID == axisID );
+			
+			return ( 2 * ( absolutePosition - inputAxis.minPosition ) / inputAxis.range - 1.0f );
+		}
+		
 		return 0.0f;
 	}
 
 	public static void CalibrateAxisSpeed( string axisID )
 	{
-		if( remoteAxisValues.ContainsKey( axisID ) )
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) ) 
 		{
-			AxisData remoteAxis = remoteAxisValues[ axisID ];
+			InputAxis inputAxis = inputAxesValues.Find( axis => axis.ID == axisID );
+			
+			if( inputAxis.velocity > inputAxis.maxVelocity ) inputAxis.maxVelocity = inputAxis.velocity;
+			else if( inputAxis.velocity < inputAxis.minVelocity ) inputAxis.minVelocity = inputAxis.velocity;
 
-			if( remoteAxis.velocity > remoteAxis.maxVelocity ) remoteAxis.maxVelocity = remoteAxis.velocity;
-			else if( remoteAxis.velocity < remoteAxis.minVelocity ) remoteAxis.minVelocity = remoteAxis.velocity;
-
-			if( remoteAxis.acceleration > remoteAxis.maxAcceleration ) remoteAxis.maxAcceleration = remoteAxis.acceleration;
-			else if( remoteAxis.acceleration < remoteAxis.minAcceleration ) remoteAxis.minAcceleration = remoteAxis.acceleration;
+			if( inputAxis.acceleration > inputAxis.maxAcceleration ) inputAxis.maxAcceleration = inputAxis.acceleration;
+			else if( inputAxis.acceleration < inputAxis.minAcceleration ) inputAxis.minAcceleration = inputAxis.acceleration;
 		}
 	}
 
 	public static void CalibrateAxisPosition( string axisID, float minPosition, float maxPosition )
 	{
-		if( remoteAxisValues.ContainsKey( axisID ) )
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) ) 
 		{
-			AxisData remoteAxis = remoteAxisValues[ axisID ];
-
-			remoteAxis.maxPosition = maxPosition;
-			remoteAxis.minPosition = minPosition;
-			remoteAxis.range = ( maxPosition - minPosition != 0.0f ) ? maxPosition - minPosition : 1.0f;
+			InputAxis inputAxis = inputAxesValues.Find( axis => axis.ID == axisID );
+			
+			inputAxis.maxPosition = maxPosition;
+			inputAxis.minPosition = minPosition;
+			inputAxis.range = ( maxPosition - minPosition != 0.0f ) ? maxPosition - minPosition : 1.0f;
 		}
 	}
 
 	public static void SetAxisFeedback( string axisID, float actualPosition, float actualVelocity )
 	{
-		if( remoteAxisValues.ContainsKey( axisID ) )
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) ) 
 		{
-			remoteAxisValues[ axisID ].actualVelocity = actualVelocity * remoteAxisValues[ axisID ].range / 2.0f;
-
-			remoteAxisValues[ axisID ].actualPosition = ( ( actualPosition + 1.0f ) * remoteAxisValues[ axisID ].range / 2.0f ) + remoteAxisValues[ axisID ].minPosition;
+			InputAxis inputAxis = inputAxesValues.Find( axis => axis.ID == axisID );
+			
+			inputAxis.feedbackPosition = ( ( actualPosition + 1.0f ) * inputAxis.range / 2.0f ) + inputAxis.minPosition;
 		
-			Debug.Log( "Feedback values updated for " + axisID + ": " + remoteAxisValues[ axisID ].actualPosition + " " + remoteAxisValues[ axisID ].actualVelocity );
+			Debug.Log( "Feedback values updated for " + axisID + ": " + inputAxis.feedbackPosition );
 		}
 	}
 
 	public static void SetAxisAbsoluteFeedback( string axisID, float actualPosition, float actualVelocity )
 	{
-		if( remoteAxisValues.ContainsKey( axisID ) )
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) ) 
 		{
-			remoteAxisValues[ axisID ].actualVelocity = actualVelocity;
+			InputAxis inputAxis = inputAxesValues.Find( axis => axis.ID == axisID );
 			
-			remoteAxisValues[ axisID ].actualPosition = actualPosition;
+			inputAxis.feedbackPosition = actualPosition;
 			
 			//Debug.Log( "Feedback values updated for " + axisID + ": " + remoteAxisValues[ axisID ].actualPosition + " " + remoteAxisValues[ axisID ].actualVelocity );
 		}
@@ -290,7 +299,7 @@ public class InputManager : MonoBehaviour
 
 	public static void SetAxisSetpoint( string axisID, float setpointPosition, float setpointVelocity, float setpointReachTime )
 	{
-		if( remoteAxisValues.ContainsKey( axisID ) )
+		if( inputAxesValues.Exists( axis => axis.ID == axisID ) ) 
 		{
 			string axisMessage = string.Format( "{0} {1} {2}|{3} {4} {5} {6}", serverDispatchTime, clientReceiveTime, Time.realtimeSinceStartup, 
 			                                                                   axisID, setpointPosition, setpointVelocity, setpointReachTime );

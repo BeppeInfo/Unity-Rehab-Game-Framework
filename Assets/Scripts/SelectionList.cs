@@ -24,14 +24,16 @@ public class SelectionList : SelectionEntry
 	private void UpdateValue()
 	{
 		if( stringLists[ valueType ].Count > 0 )
-		{
+			SetStringValue( stringLists[ valueType ][ currentValueID ] );
+		/*{
 			PlayerPrefs.SetString( valueType, stringLists[ valueType ][ currentValueID ] );
 			Debug.Log( valueType + ": " + PlayerPrefs.GetString( valueType ) );
-		}
+		}*/
 		else
-			PlayerPrefs.SetString( valueType, "" );
+			SetStringValue( "" );
+		//	PlayerPrefs.SetString( valueType, "" );
 
-		value = PlayerPrefs.GetString( valueType );
+		//value = PlayerPrefs.GetString( valueType );
 		if( displayText ) displayText.text = value;
 	}
 	

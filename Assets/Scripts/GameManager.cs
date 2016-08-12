@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
 
 	protected class ObjectData
 	{
-		public LocalPlayer handle = null;
+		public NetworkPlayer handle = null;
 		public Vector3 initialPosition, initialRotation;
 		public Vector3 globalPosition, globalRotation;
 		public Vector3 mapPosition, mapRotation;
@@ -36,10 +36,10 @@ public class GameManager : MonoBehaviour
 		mapScale = mapBoundingBox.bounds.size;
 		inverseMapScale = new Vector3( 1 / mapScale.x, 1 / mapScale.y, 1 / mapScale.z );
 
-		foreach( LocalPlayer player in FindObjectsOfType<LocalPlayer>() )
+		foreach( NetworkPlayer player in FindObjectsOfType<NetworkPlayer>() )
 		{
 			string playerName = player.gameObject.name;
-			Debug.Log( "Found LocalPlayer: " + playerName );
+			Debug.Log( "Found NetworkPlayer: " + playerName );
 			localPlayers.Add( playerName );
 			activeObjects[ playerName ] = new ObjectData();
 			activeObjects[ playerName ].handle = player;
@@ -71,18 +71,17 @@ public class GameManager : MonoBehaviour
 		if( Input.GetKey( KeyCode.Escape ) )
 			Application.LoadLevel( "Play Game" );
 	}
-
-	// Update is called once per frame
+	
 	protected virtual void FixedUpdate()
 	{
-		Vector3 playerLocalPosition, playerLocalRotation;
+		/*Vector3 playerLocalPosition, playerLocalRotation;
 		Vector3 playerCurrentSpeed, playerNewSpeed, playerDeltaSpeed;
 		Vector3 playerCurrentAngularSpeed, playerNewAngularSpeed, playerDeltaAngularSpeed;
 
 		foreach( string playerName in localPlayers )
 		{
 			ObjectData playerData = activeObjects[ playerName ];
-			LocalPlayer player = playerData.handle;
+			NetworkPlayer player = playerData.handle;
 
 			playerCurrentSpeed = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().velocity );
 			playerNewSpeed = Vector3.Scale( player.normalizedSpeed, mapScale );
@@ -110,13 +109,13 @@ public class GameManager : MonoBehaviour
 			playerCurrentSpeed = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().velocity );
 			playerCurrentAngularSpeed = player.transform.InverseTransformDirection( player.GetComponent<Rigidbody>().angularVelocity );
 
-			/*Debug.Log( "GameManager: " + playerName + " speed: " + player.normalizedPosition + 
+			Debug.Log( "GameManager: " + playerName + " speed: " + player.normalizedPosition + 
 			          " -> " + playerLocalPosition.ToString() + 
-			          " -> " + Vector3.Scale( playerLocalPosition, inverseMapScale ).ToString() );*/
+			          " -> " + Vector3.Scale( playerLocalPosition, inverseMapScale ).ToString() );
 
 			player.FeedBack( Vector3.Scale( playerLocalPosition, inverseMapScale ), playerLocalRotation / 180.0f,
 			                Vector3.Scale( playerCurrentSpeed, inverseMapScale ), playerCurrentAngularSpeed / 180.0f );
-		}
+		}*/
 	}
 
 	IEnumerator UpdateServer()
@@ -148,7 +147,7 @@ public class GameManager : MonoBehaviour
 						localMessage = "Game Position";
 					}
 
-					//localMessage += positionData;
+					localMessage += positionData;
 				}
 			}
 
@@ -183,7 +182,7 @@ public class GameManager : MonoBehaviour
 			remoteData = ConnectionManager.GameClient.QueryData( "Game Position" );
 			if( remoteData.Length >= 7 )
 			{
-				LocalPlayer player;
+				NetworkPlayer player;
 				string playerName = remoteData[ 0 ];
 
 				playerPosition = new Vector3( float.Parse( remoteData[ 1 ] ) * mapScale.x, 
@@ -207,8 +206,8 @@ public class GameManager : MonoBehaviour
 					{
 						if( playerName.Contains( modelName ) )
 						{
-							player = (LocalPlayer) Instantiate( activeObjects[ modelName ].handle, playerPosition, Quaternion.Euler( playerRotation ) );
-							player.GetComponent<LocalPlayer>().enabled = false;
+							player = (NetworkPlayer) Instantiate( activeObjects[ modelName ].handle, playerPosition, Quaternion.Euler( playerRotation ) );
+							player.GetComponent<NetworkPlayer>().enabled = false;
 							remotePlayers.Add( playerName );
 							activeObjects[ playerName ] = new ObjectData();
 							activeObjects[ playerName ].handle = player;

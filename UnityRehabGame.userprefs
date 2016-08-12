@@ -1,13 +1,13 @@
-﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\InputManager.cs">
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\NetworkPlayer.cs">
     <Files>
-      <File FileName="Assets\Scripts\InputManager.cs" Line="150" Column="8" />
-      <File FileName="UnityRehabGame.sln" Line="46" Column="1" />
+      <File FileName="Assets\Scripts\Calibration.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\InputManager.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\SelectionEntry.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\CreateConnection.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\LocalPlayer.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Calibration.cs" Line="55" Column="3" />
+      <File FileName="Assets\Scripts\NetworkPlayer.cs" Line="33" Column="16" />
       <File FileName="Assets\Scripts\FollowTransform.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\FishingLine.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\RemoteInfo.cs" Line="1" Column="1" />
@@ -19,7 +19,7 @@
       <File FileName="Assets\Scripts\NetworkClientUDP.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\NetworkClientTCP.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\NetworkInterface.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GameManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameplayManager.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

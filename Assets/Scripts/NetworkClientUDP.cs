@@ -7,8 +7,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-public class NetworkClientUDP : NetworkClient {
-
+public class NetworkClientUDP : NetworkClient 
+{
 	private List<string> messageQueue = new List<string>( 5 );
 
 	private Thread updateThread = null;
