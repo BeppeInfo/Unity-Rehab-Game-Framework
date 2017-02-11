@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Pesca.unity
+- path: Assets/Games/BoxClash.unity
   isLoaded: 1
   isActive: 1
