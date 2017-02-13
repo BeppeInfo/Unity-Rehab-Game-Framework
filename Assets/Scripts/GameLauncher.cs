@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,25 +11,21 @@ public class GameLauncher : MonoBehaviour
 
 	private bool hasGamesAvailable = false;
 
+	public List<string> gameTitles = new List<string>();
+
 	void Start() 
 	{
 		gameSelector = GetComponent<Dropdown>();
 
 		string labelText = gameSelector.captionText.text;
 
-		string[] gameFileNames = Directory.GetFiles( Application.dataPath + "/Games/", "*.unity" );
-
-		if( gameFileNames.Length > 0 )
+		if( gameTitles.Count > 0 )
 		{
 			hasGamesAvailable = true;
 
-			List<string> gameTitles = new List<string>();
-			foreach( string gameFileName in gameFileNames )
-				gameTitles.Add( Path.GetFileNameWithoutExtension( gameFileName ) );
-
 			RectTransform optionsArea = gameSelector.template;
 			float itemHeight = gameSelector.template.GetComponent<ScrollRect>().content.rect.height;
-			optionsArea.sizeDelta = new Vector2( optionsArea.sizeDelta.x, gameFileNames.Length * itemHeight );
+			optionsArea.sizeDelta = new Vector2( optionsArea.sizeDelta.x, gameTitles.Count * itemHeight );
 			optionsArea.anchoredPosition = new Vector2( optionsArea.anchoredPosition.x, optionsArea.sizeDelta.y );
 
 			gameSelector.ClearOptions();

@@ -4,15 +4,13 @@
 [ RequireComponent( typeof(Collider) ) ]
 public class PositionSlaveController : Controller 
 {
-	const int POSITION = 0, VELOCITY = 1;
-
 	void FixedUpdate()
 	{
-		Vector3 masterPosition = new Vector3( GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.X, POSITION ),
-											  0.0f, GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.Z, POSITION ) );
+		Vector3 masterPosition = new Vector3( GameManager.GetConnection().GetRemoteValue( (byte) elementID, X, POSITION ),
+											  0.0f, GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, POSITION ) );
 
-		Vector3 masterVelocity = new Vector3( GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.X, VELOCITY ),
-											  0.0f, GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.Z, VELOCITY ) );
+		Vector3 masterVelocity = new Vector3( GameManager.GetConnection().GetRemoteValue( (byte) elementID, X, VELOCITY ),
+											  0.0f, GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, VELOCITY ) );
 
 		Vector3 trackingError = masterPosition - body.position;
 

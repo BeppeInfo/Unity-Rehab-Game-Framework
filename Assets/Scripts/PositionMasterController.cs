@@ -4,20 +4,18 @@
 [ RequireComponent( typeof(BoxCollider) ) ]
 public class PositionMasterController : Controller 
 {
-	const int POSITION = 0, VELOCITY = 1, ACCELERATION = 2;
-
 	void FixedUpdate()
 	{
-		float inputDelay = GameManager.GetConnection().GetNetworkDelay( elementID );
+		float inputDelay = GameManager.GetConnection().GetNetworkDelay( (byte) elementID );
 
-		Vector3 masterPosition = new Vector3( GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.X, POSITION ),
-											  0.0f, GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.Z, POSITION ) );
+		Vector3 masterPosition = new Vector3( GameManager.GetConnection().GetRemoteValue( (byte) elementID, X, POSITION ),
+											  0.0f, GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, POSITION ) );
 
-		Vector3 masterVelocity = new Vector3( GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.X, VELOCITY ),
-											  0.0f, GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.Z, VELOCITY ) );
+		Vector3 masterVelocity = new Vector3( GameManager.GetConnection().GetRemoteValue( (byte) elementID, X, VELOCITY ),
+											  0.0f, GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, VELOCITY ) );
 
-		Vector3 masterAcceleration = new Vector3( GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.X, ACCELERATION ),
-												  0.0f, GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.Z, ACCELERATION ) );
+		Vector3 masterAcceleration = new Vector3( GameManager.GetConnection().GetRemoteValue( (byte) elementID, X, ACCELERATION ),
+												  0.0f, GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, ACCELERATION ) );
 
 		masterPosition += masterVelocity * inputDelay + masterAcceleration * inputDelay * inputDelay / 2.0f;
 
@@ -35,9 +33,9 @@ public class PositionMasterController : Controller
 		}
 
 		// Send locally controlled object position over network
-		GameManager.GetConnection().SetLocalValue( elementID, (int) GameAxis.X, POSITION, body.position.x );
-		GameManager.GetConnection().SetLocalValue( elementID, (int) GameAxis.Z, POSITION, body.position.z );
-		GameManager.GetConnection().SetLocalValue( elementID, (int) GameAxis.X, VELOCITY, body.velocity.x );
-		GameManager.GetConnection().SetLocalValue( elementID, (int) GameAxis.Z, VELOCITY, body.velocity.z );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, X, POSITION, body.position.x );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, POSITION, body.position.z );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, X, VELOCITY, body.velocity.x );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, VELOCITY, body.velocity.z );
 	}
 }

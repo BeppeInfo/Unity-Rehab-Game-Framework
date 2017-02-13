@@ -72,12 +72,12 @@ public class BoxClashClient : GameClient
 		if( clientID == 0 ) 
 		{
 			boxes[ 0 ].GetComponent<ForcePlayerController>().enabled = true;
-			boxes[ 1 ].GetComponent<ForceSlaveController>().enabled = true;
+			boxes[ 1 ].GetComponent<PositionSlaveController>().enabled = true;
 			player = boxes[ 0 ].GetComponent<ForcePlayerController>();
 		} 
 		else if( clientID == 1 ) 
 		{
-			boxes[ 0 ].GetComponent<ForceSlaveController>().enabled = true;
+			boxes[ 0 ].GetComponent<PositionSlaveController>().enabled = true;
 			boxes[ 1 ].GetComponent<ForcePlayerController>().enabled = true;
 			player = boxes[ 1 ].GetComponent<ForcePlayerController>();
 			gameCamera.transform.RotateAround( transform.position, Vector3.up, 180.0f );

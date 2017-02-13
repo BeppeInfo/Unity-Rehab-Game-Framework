@@ -3,13 +3,16 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public enum GameAxis : byte { X, Y, Z };
-
 [ RequireComponent( typeof(Rigidbody) ) ]
 [ RequireComponent( typeof(Collider) ) ]
 public abstract class Controller : MonoBehaviour 
 {
     public int elementID;
+
+	protected const byte X = 0, Y = 1, Z = 2;
+	protected const int POSITION = 0, VELOCITY = 1, ACCELERATION = 2;
+	protected const int FORCE = 2, MOMENTUM = 3;
+	protected const int WAVE = 2, WAVE_INTEGRAL = 3;
 
 	public Collider boundaries;
     protected Vector3 rangeLimits = new Vector3( 7.5f, 0.0f, 7.5f );

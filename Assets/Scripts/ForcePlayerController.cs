@@ -12,13 +12,13 @@ public class ForcePlayerController : Controller
 
 	void FixedUpdate()
 	{
-		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.Z, 0 );
-		float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.Z, 1 );
+		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
+		float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
 
 		playerForce = controlAxis.GetNormalizedValue( AxisVariable.FORCE ) * rangeLimits.z * transform.forward.z;
 		//Debug.Log( "Input force: " + playerForce.ToString() );
 		feedbackForce = waveImpedance * body.velocity.z - Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveVariable;
-		//feedbackForce = GameManager.GetConnection().GetRemoteValue( elementID, (int) GameAxis.Z, 0 );
+		//feedbackForce = GameManager.GetConnection().GetRemoteValue( elementID, GameAxis.Z, FORCE );
 
 		body.AddForce( ( playerForce + feedbackForce ) * Vector3.forward - body.velocity * DRAG_DAMPING, ForceMode.Force );
 		//controlAxis.SetNormalizedValue( AxisVariable.FORCE, feedbackForce );
@@ -27,10 +27,11 @@ public class ForcePlayerController : Controller
 		float outputWaveVariable = -inputWaveVariable + Mathf.Sqrt( 2.0f * waveImpedance ) * body.velocity.z;
 		float outputWaveIntegral = -inputWaveIntegral + Mathf.Sqrt( 2.0f * waveImpedance ) * body.position.z;
 
-		GameManager.GetConnection().SetLocalValue( elementID, (int) GameAxis.Z, 0, outputWaveVariable );
-		GameManager.GetConnection().SetLocalValue( elementID, (int) GameAxis.Z, 1, outputWaveIntegral );
-		//GameManager.GetConnection().SetLocalValue( elementID, (int) GameAxis.Z, 0, body.velocity.z );
-		//GameManager.GetConnection().SetLocalValue( elementID, (int) GameAxis.Z, 1, body.position.z );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE, outputWaveVariable );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE_INTEGRAL, outputWaveIntegral );
+
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, POSITION, body.position.z );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, VELOCITY, body.velocity.z );
 	}
 
 	public void OnEnable()
