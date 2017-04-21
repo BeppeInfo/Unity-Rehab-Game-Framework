@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/Games/Box Clash.unity
+- path: Assets/Games/Double Pong.unity
   isLoaded: 1
   isActive: 1

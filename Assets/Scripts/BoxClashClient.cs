@@ -10,8 +10,6 @@ public class BoxClashClient : GameClient
 
 	private ForcePlayerController player = null;
 
-	//private float error = 0.0f;
-
 	private int clientID = -1;
 
 	void Awake()

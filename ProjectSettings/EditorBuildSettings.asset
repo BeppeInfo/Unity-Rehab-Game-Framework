@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/InitialScreen.unity
+    path: Assets/Initial Screen.unity
   - enabled: 1
-    path: Assets/Games/DoublePong.unity
+    path: Assets/Games/Double Pong.unity
   - enabled: 1
-    path: Assets/Games/BoxClash.unity
+    path: Assets/Games/Box Clash.unity

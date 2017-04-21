@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoublePingPong", "Assembly-CSharp.csproj", "{CDC21C26-6846-666C-611D-C20CC36F8010}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityRehabGame", "Assembly-CSharp.csproj", "{0D77CD6B-CB52-6EAB-32DE-053D65E53403}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +9,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CDC21C26-6846-666C-611D-C20CC36F8010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CDC21C26-6846-666C-611D-C20CC36F8010}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CDC21C26-6846-666C-611D-C20CC36F8010}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CDC21C26-6846-666C-611D-C20CC36F8010}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D77CD6B-CB52-6EAB-32DE-053D65E53403}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D77CD6B-CB52-6EAB-32DE-053D65E53403}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D77CD6B-CB52-6EAB-32DE-053D65E53403}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D77CD6B-CB52-6EAB-32DE-053D65E53403}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

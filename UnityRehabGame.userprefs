@@ -9,21 +9,23 @@
       <File FileName="Assets\Scripts\Controller.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\DoublePongClient.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\DoublePongServer.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\InputAxis.cs" Line="223" Column="78" />
-      <File FileName="Assets\Scripts\BoxClashClient.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\BoxClashServer.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\InputAxis.cs" Line="115" Column="1" />
+      <File FileName="Assets\Scripts\BoxClashClient.cs" Line="92" Column="41" />
+      <File FileName="Assets\Scripts\BoxClashServer.cs" Line="37" Column="28" />
       <File FileName="Assets\Scripts\Configuration.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\BallController.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\InputAxisManager.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\SpringDeformation.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\PositionMasterController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\SpringDeformation.cs" Line="19" Column="36" />
+      <File FileName="Assets\Scripts\PositionMasterController.cs" Line="13" Column="3" />
       <File FileName="Assets\Scripts\SimpleJSON.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\InputAxisInfoClient.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\ForcePlayerController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\ForcePlayerController.cs" Line="70" Column="73" />
       <File FileName="Assets\Scripts\PositionPlayerController.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\ForceMasterController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\ForceMasterController.cs" Line="30" Column="34" />
       <File FileName="Assets\Scripts\InputAxisDataClient.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\InputAxisClient.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\ForceArrowScaler.cs" Line="21" Column="3" />
+      <File FileName="Assets\Scripts\PositionSlaveController.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

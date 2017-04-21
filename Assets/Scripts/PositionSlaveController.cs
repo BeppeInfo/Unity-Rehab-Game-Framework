@@ -24,6 +24,7 @@ public class PositionSlaveController : Controller
 
 	public void OnEnable()
 	{
+		//body.isKinematic = true;
 		body.position = initialPosition;
 		body.velocity = Vector3.zero;
 	}

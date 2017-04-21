@@ -130,6 +130,10 @@ public class KeyboardInputAxis : InputAxis
 	{
 		inputValues[ (int) AxisVariable.VELOCITY ].current = Input.GetAxis( id );
 		inputValues[ (int) AxisVariable.POSITION ].current += inputValues[ (int) AxisVariable.VELOCITY ].current * updateTime;
+		if( inputValues[ (int) AxisVariable.POSITION ].current > inputValues[ (int) AxisVariable.POSITION ].max )
+			inputValues[ (int) AxisVariable.POSITION ].current = inputValues[ (int) AxisVariable.POSITION ].max;
+		else if( inputValues[ (int) AxisVariable.POSITION ].current < inputValues[ (int) AxisVariable.POSITION ].min )
+			inputValues[ (int) AxisVariable.POSITION ].current = inputValues[ (int) AxisVariable.POSITION ].min;
 		inputValues[ (int) AxisVariable.FORCE ].current = inputValues[ (int) AxisVariable.VELOCITY ].current;
 	}
 }
@@ -221,8 +225,8 @@ public class RemoteInputAxis : InputAxis
 		for( int valueIndex = 0; valueIndex < inputValues.Length; valueIndex++ )
 		{
 			int outputValuePosition = outputDataPosition + valueIndex * sizeof(float);
-			if( Mathf.Abs( inputValues[ valueIndex ].setpoint - BitConverter.ToSingle( connection.outputBuffer, outputValuePosition ) ) > 0.1f ) 
-				hasOutputChanged = true;
+			/*float valueDelta = Mathf.Abs( inputValues[ valueIndex ].setpoint - BitConverter.ToSingle( connection.outputBuffer, outputValuePosition ) );
+			if( valueDelta / inputValues[ valueIndex ].range > 0.05f )*/ hasOutputChanged = true;
 		}
 
 		if( hasOutputChanged ) 
