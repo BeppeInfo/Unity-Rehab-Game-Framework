@@ -1,24 +1,23 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/ForceMasterController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GameLauncher.cs">
     <Files>
-      <File FileName="Assets/Scripts/GameLauncher.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Configuration.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/GameClientConnection.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/GameServerConnection.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/GameManager.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/BallController.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/Controller.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/SpringDeformation.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/ForceMasterController.cs" Line="18" Column="3" />
-      <File FileName="Assets/Scripts/ForcePlayerController.cs" Line="15" Column="2" />
-      <File FileName="Assets/Scripts/GameConnection.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/PositionSlaveController.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/PositionPlayerController.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/PositionMasterController.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/ForceSlaveController.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/BoxClashClient.cs" Line="1" Column="1" />
-      <File FileName="Assets/Scripts/ForceArrowScaler.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameLauncher.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Configuration.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameClientConnection.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameServerConnection.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\BallController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Controller.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\SpringDeformation.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\ForceMasterController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\ForcePlayerController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameConnection.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\PositionSlaveController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\PositionPlayerController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\PositionMasterController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\BoxClashClient.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\ForceArrowScaler.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

@@ -18,6 +18,8 @@ public class BallController : Controller
 	{
 		body.velocity *= speed / body.velocity.magnitude;
 
+		body.angularVelocity = Quaternion.AngleAxis( 90.0f, Vector3.up ) * body.velocity;
+
 		UpdateMasterValues( body.position, body.velocity );
 	}
 
