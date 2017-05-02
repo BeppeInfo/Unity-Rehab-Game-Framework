@@ -18,3 +18,7 @@ Temp/UnityLockfile
 *.bin
 *.dll
 *.stamp
+*.info
+*.exe
+*.bakert
+*.backup
