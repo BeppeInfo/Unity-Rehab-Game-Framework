@@ -22,3 +22,6 @@ Temp/UnityLockfile
 *.exe
 *.bakert
 *.backup
+*.mdb
+*.dll
+*.buildreport
