@@ -20,6 +20,8 @@ public class PositionSlaveController : Controller
 		else masterVelocity += trackingError;
 
 		body.velocity = masterVelocity;
+
+		body.angularVelocity = Quaternion.AngleAxis( 90.0f, Vector3.up ) * body.velocity / size.y / 2.0f;
 	}
 
 	public void OnEnable()
