@@ -7,55 +7,34 @@ public class ForcePlayerController : Controller
 
 	private InputAxis controlAxis = null;
 
-	private float lastPosition = 0.0f;
-	private float playerForce = 0.0f, feedbackForce = 0.0f;
-
-	private float absoluteSetpoint = 0.0f;
-
-	private float feedbackForceScale = 0.0f;
-
-	float playerPosition = 0.0f;
+	private float playerForce = 0.0f, playerForceIntegral = 0.0f;
 
 	void Start()
 	{
 		initialPosition = body.position;
-		absoluteSetpoint = initialPosition.z;
 	}
 
 	void FixedUpdate()
 	{
-		//float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
-		//float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
+		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
+		float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
 
-		playerPosition = Mathf.Clamp( controlAxis.GetNormalizedValue( AxisVariable.POSITION ), -1.0f, 1.0f );
-		float outputPosition = playerPosition * rangeLimits.z * transform.forward.z;
-		float outputVelocity = ( outputPosition - lastPosition ) / Time.fixedDeltaTime;
-		lastPosition = outputPosition;
+		playerForce = controlAxis.GetValue( AxisVariable.FORCE ) * transform.forward.z;
+		playerForceIntegral += playerForce * Time.fixedDeltaTime;
 
-		playerForce = Mathf.Clamp( controlAxis.GetNormalizedValue( AxisVariable.FORCE ), -1.0f, 1.0f );
+		float inputVelocity = ( Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveVariable - playerForce ) / waveImpedance;
+		float inputPosition = ( Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveIntegral - playerForceIntegral ) / waveImpedance;
 
-		//feedbackForce = waveImpedance * body.velocity.z - Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveVariable;
-		feedbackForce = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, FORCE );
-		feedbackForce = feedbackForce / rangeLimits.z / transform.forward.z;
-		controlAxis.SetValue( AxisVariable.FORCE, -feedbackForce * feedbackForceScale );
+		if( inputPosition != 0.0f )	body.velocity = Vector3.forward * ( inputVelocity + inputPosition - body.position.z );
 
-		float inputPosition = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, POSITION );
-		float inputVelocity = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, VELOCITY );
-
-		if( inputPosition != 0.0f )
-			body.velocity = Vector3.forward * ( inputVelocity + inputPosition - body.position.z );
-
-		float relativeSetpoint = ( absoluteSetpoint - initialPosition.z ) / rangeLimits.z / transform.forward.z;
+		float relativeSetpoint = ( body.position.z - initialPosition.z ) / rangeLimits.z / transform.forward.z;
 		controlAxis.SetNormalizedValue( AxisVariable.POSITION, relativeSetpoint );
 
-		//float outputWaveVariable = -inputWaveVariable + Mathf.Sqrt( 2.0f * waveImpedance ) * outputVelocity;
-		//float outputWaveIntegral = -inputWaveIntegral + Mathf.Sqrt( 2.0f * waveImpedance ) * outputPosition;
+		float outputWaveVariable = ( waveImpedance * inputVelocity + playerForce ) / Mathf.Sqrt( 2.0f * waveImpedance );
+		float outputWaveIntegral = ( waveImpedance * inputPosition + playerForceIntegral ) / Mathf.Sqrt( 2.0f * waveImpedance );
 
-		//GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE, outputWaveVariable );
-		//GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE_INTEGRAL, outputWaveIntegral );
-
-		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, POSITION, outputPosition );
-		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, VELOCITY, outputVelocity );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE, outputWaveVariable );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE_INTEGRAL, outputWaveIntegral );
 	}
 
 	public void OnEnable()
@@ -63,11 +42,8 @@ public class ForcePlayerController : Controller
 		controlAxis = Configuration.GetSelectedAxis();
 	}
 
-	public float GetInputForce() { return /*playerForce*/playerPosition; }
-	public float GetInteractionForce() { return feedbackForce; }
+	public float GetPlayerForce() { return playerForce; }
 
 	public void SetHelperStiffness( float value ){ if( controlAxis != null ) controlAxis.SetValue( AxisVariable.STIFFNESS, value ); }
 	public void SetHelperDamping( float value ){ if( controlAxis != null ) controlAxis.SetValue( AxisVariable.DAMPING, value ); }
-
-	public void SetFeedbackForceScale( float value ){ feedbackForceScale = value; }
 }

@@ -8,6 +8,8 @@ public class BoxClashClient : GameClient
 {
 	public Controller[] boxes = new Controller[ 2 ];
 
+	public SpringJoint boxesSpringJoint;
+
 	private ForcePlayerController player = null;
 
 	private int clientID = -1;
@@ -30,7 +32,7 @@ public class BoxClashClient : GameClient
 		//else sliderHandle.color = Color.green;
 
 		Rigidbody playerBody = player.GetComponent<Rigidbody>();
-		localPlayerText.text = string.Format( "Input:{0:F3}N\nInteract:{1:F3}N", player.GetInputForce(), player.GetInteractionForce() );
+		localPlayerText.text = string.Format( "Input:{0:F3}N\nInteract:{1:F3}N", player.GetPlayerForce(), boxesSpringJoint.currentForce );
 		remotePlayerText.text = string.Format( "Position:{0:F3}\nVelocity:{1:F3}", playerBody.position.z, playerBody.velocity.z );
 	}
 
@@ -49,7 +51,7 @@ public class BoxClashClient : GameClient
 
 			double gameTime = DateTime.Now.TimeOfDay.TotalSeconds;
 			Rigidbody playerBody = player.GetComponent<Rigidbody>();
-			boxLog.WriteLine( string.Format( "{0}\t{1}\t{2}\t{3}\t{4}", gameTime, player.GetInputForce(), player.GetInteractionForce(), playerBody.position.z, playerBody.velocity.z ) );
+			boxLog.WriteLine( string.Format( "{0}\t{1}\t{2}\t{3}\t{4}", gameTime, player.GetPlayerForce(), boxesSpringJoint.currentForce, playerBody.position.z, playerBody.velocity.z ) );
 			networkLog.WriteLine( string.Format( "{0}\t{1}", gameTime, currentConnectionInfo.rtt / 2.0f ) );
 
 			yield return new WaitForFixedUpdate();
