@@ -39,7 +39,7 @@ public class BoxClashClient : GameClient
 		//else if( error >= PositionPositionPlayerController.ERROR_THRESHOLD ) sliderHandle.color = Color.yellow;
 		//else sliderHandle.color = Color.green;
 
-		localPlayerText.text = string.Format( "Input:{0:F3}N\nInteract:{1:F3}N", player.GetPlayerForce() );
+		localPlayerText.text = string.Format( "Input:{0:F3}N\nInteract:{1:F3}N", player.GetOutputForce() );
 		remotePlayerText.text = string.Format( "Position:{0:F3}\nVelocity:{2:F3}", player.GetRelativePosition(), player.GetVelocity() );
 	}
 
@@ -57,7 +57,7 @@ public class BoxClashClient : GameClient
 				currentConnectionInfo.sentPackets, currentConnectionInfo.receivedPackets, currentConnectionInfo.lostPackets, currentConnectionInfo.rtt );
 
 			double gameTime = DateTime.Now.TimeOfDay.TotalSeconds;
-			boxLog.WriteLine( string.Format( "{0}\t{1}\t{2}\t{3}", gameTime, player.GetPlayerForce(), player.GetAbsolutePosition(), player.GetVelocity() ) );
+			boxLog.WriteLine( string.Format( "{0}\t{1}\t{2}\t{3}\t{4}\t{5}", gameTime, player.GetOutputForce(), player.GetInputPosition(), player.GetAbsolutePosition(), player.GetInputVelocity(), player.GetVelocity() ) );
 			networkLog.WriteLine( string.Format( "{0}\t{1}", gameTime, currentConnectionInfo.rtt / 2.0f ) );
 
 			yield return new WaitForFixedUpdate();
