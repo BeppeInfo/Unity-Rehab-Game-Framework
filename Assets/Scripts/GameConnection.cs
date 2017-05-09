@@ -61,7 +61,13 @@ public abstract class GameConnection
 
 		if( !localValues.ContainsKey( localKey ) ) localValues[ localKey ] = new float[ TYPE_VALUES_NUMBER ];
 
-		if( Math.Abs( localValues[ localKey ][ valueIndex ] - value ) > 0.1f )
+		if( Mathf.Approximately( localValues[ localKey ][ valueIndex ], 0.0f ) )
+		{
+			//Debug.Log( "updating value [" + localKey.ToString() + "," + valueIndex.ToString() + "]: " + localValues[ localKey ][ valueIndex ].ToString() + " -> " + value.ToString() );
+			localValues[ localKey ][ valueIndex ] = value;
+			updatedLocalKeys.Add( localKey );
+		}
+		else if( Mathf.Abs( ( localValues[ localKey ][ valueIndex ] - value ) / localValues[ localKey ][ valueIndex ] ) > 0.05f )
 		{
 			//Debug.Log( "updating value [" + localKey.ToString() + "," + valueIndex.ToString() + "]: " + localValues[ localKey ][ valueIndex ].ToString() + " -> " + value.ToString() );
 			localValues[ localKey ][ valueIndex ] = value;

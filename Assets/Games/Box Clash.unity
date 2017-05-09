@@ -1426,13 +1426,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 824582910}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: -1.25}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 367160702}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!114 &824582912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2244,8 +2244,6 @@ MonoBehaviour:
   boxes:
   - {fileID: 1608433780}
   - {fileID: 1818957269}
-  stiffnessSlider: {fileID: 219725799}
-  dampingSlider: {fileID: 258516282}
 --- !u!114 &1464675929
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2265,7 +2263,7 @@ MonoBehaviour:
   boxes:
   - {fileID: 1608433782}
   - {fileID: 1818957275}
-  boxesSpringJoint: {fileID: 0}
+  boxesSpringJoint: {fileID: 1818957276}
 --- !u!1 &1513961321
 GameObject:
   m_ObjectHideFlags: 0
@@ -2419,6 +2417,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 0
   boundaries: {fileID: 1464675926}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &1608433776
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2503,6 +2502,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 0
   boundaries: {fileID: 1464675926}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &1608433782
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2516,6 +2516,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 0
   boundaries: {fileID: 1464675926}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &1648382676
 GameObject:
   m_ObjectHideFlags: 0
@@ -3101,6 +3102,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 1
   boundaries: {fileID: 1464675926}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &1818957270
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3185,6 +3187,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 1
   boundaries: {fileID: 1464675926}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &1818957275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3198,6 +3201,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 1
   boundaries: {fileID: 1464675926}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!145 &1818957276
 SpringJoint:
   m_ObjectHideFlags: 0

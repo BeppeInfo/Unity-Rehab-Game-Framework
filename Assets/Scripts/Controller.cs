@@ -18,7 +18,7 @@ public abstract class Controller : MonoBehaviour
     protected Vector3 rangeLimits = new Vector3( 7.5f, 0.0f, 7.5f );
 
 	protected Vector3 size = Vector3.one;
-	protected Vector3 initialPosition = Vector3.zero;
+	/*protected*/public Vector3 initialPosition = Vector3.zero;
 
 	protected Rigidbody body;
 

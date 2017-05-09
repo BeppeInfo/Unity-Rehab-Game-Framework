@@ -2072,6 +2072,10 @@ MonoBehaviour:
     m_Options:
     - m_Text: Select Game
       m_Image: {fileID: 0}
+    - m_Text: Double Pong
+      m_Image: {fileID: 0}
+    - m_Text: Box Clash
+      m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -2145,8 +2149,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameTitles:
   - Double Pong
-  - Double Pong
-  - Box Clash
+  - 
+  - 
 --- !u!1 &772456472
 GameObject:
   m_ObjectHideFlags: 0

@@ -19,7 +19,7 @@ public class PositionSlaveController : Controller
 		if( trackingError.magnitude > 0.6f * rangeLimits.magnitude ) body.MovePosition( masterPosition );
 		else masterVelocity += trackingError;
 
-		body.velocity = masterVelocity;
+		if( masterPosition != Vector3.zero ) body.velocity = masterVelocity;
 
 		body.angularVelocity = Quaternion.AngleAxis( 90.0f, Vector3.up ) * body.velocity / size.y / 2.0f;
 	}

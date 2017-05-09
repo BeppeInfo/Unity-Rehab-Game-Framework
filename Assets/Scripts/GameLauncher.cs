@@ -11,27 +11,20 @@ public class GameLauncher : MonoBehaviour
 
 	private bool hasGamesAvailable = false;
 
-	public List<string> gameTitles = new List<string>();
-
 	void Start() 
 	{
 		gameSelector = GetComponent<Dropdown>();
 
 		string labelText = gameSelector.captionText.text;
 
-		if( gameTitles.Count > 0 )
+		if( gameSelector.options.Count > 1 )
 		{
 			hasGamesAvailable = true;
 
 			RectTransform optionsArea = gameSelector.template;
 			float itemHeight = gameSelector.template.GetComponent<ScrollRect>().content.rect.height;
-			optionsArea.sizeDelta = new Vector2( optionsArea.sizeDelta.x, gameTitles.Count * itemHeight );
+			optionsArea.sizeDelta = new Vector2( optionsArea.sizeDelta.x, gameSelector.options.Count * itemHeight );
 			optionsArea.anchoredPosition = new Vector2( optionsArea.anchoredPosition.x, optionsArea.sizeDelta.y );
-
-			gameSelector.ClearOptions();
-			gameSelector.AddOptions( gameTitles );
-
-			Debug.Log( "Content height: " + gameSelector.template.GetChild( 0 ).GetComponentInChildren<RectTransform>().rect.height );
 		}
 
 		gameSelector.captionText.text = labelText;
