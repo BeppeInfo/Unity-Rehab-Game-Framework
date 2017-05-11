@@ -21,7 +21,7 @@ public class ForcePlayerController : Controller
 		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
 		float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
 
-		outputForce = controlAxis.GetScaledValue( AxisVariable.FORCE ) * rangeLimits.z * transform.forward.z;
+		outputForce = controlAxis.GetScaledValue( AxisVariable.FORCE ) /** rangeLimits.z*/ * transform.forward.z;
 		outputForceIntegral += outputForce * Time.fixedDeltaTime;
 
 		inputVelocity = ( Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveVariable - outputForce ) / Controller.WaveImpedance;
@@ -29,7 +29,7 @@ public class ForcePlayerController : Controller
 
 		if( inputWaveVariable != 0.0f ) body.velocity = Vector3.forward * ( inputVelocity + DRIFT_CORRECTION_GAIN * ( inputPosition - body.position.z ) );
 
-		float relativeSetpoint = ( body.position.z - initialPosition.z ) / rangeLimits.z / transform.forward.z;
+		float relativeSetpoint = ( body.position.z - initialPosition.z ) /*/ rangeLimits.z*/ / transform.forward.z;
 		controlAxis.SetScaledValue( AxisVariable.POSITION, relativeSetpoint );
 
 		float outputWaveVariable = inputWaveVariable - Mathf.Sqrt( 2.0f / Controller.WaveImpedance ) * outputForce;
@@ -42,6 +42,12 @@ public class ForcePlayerController : Controller
 	public void OnEnable()
 	{
 		controlAxis = Configuration.GetSelectedAxis();
+	}
+
+	public void OnDisable()
+	{
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE, 0.0f );
+		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE_INTEGRAL, 0.0f );
 	}
 
 	public float GetOutputForce() { return outputForce; }

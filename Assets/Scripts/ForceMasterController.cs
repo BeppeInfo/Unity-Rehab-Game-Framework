@@ -14,6 +14,9 @@ public class ForceMasterController : Controller
 		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
 		float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
 
+		if( inputWaveVariable == 0.0 ) body.constraints |= RigidbodyConstraints.FreezePositionZ;
+		else body.constraints &= (~RigidbodyConstraints.FreezePositionZ);
+
 		inputForce = Controller.WaveImpedance * body.velocity.z - Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveVariable;
 		float inputForceIntegral = Controller.WaveImpedance * body.position.z - Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveIntegral;
 

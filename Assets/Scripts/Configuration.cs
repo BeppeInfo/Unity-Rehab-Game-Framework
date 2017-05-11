@@ -131,7 +131,7 @@ public class Configuration : MonoBehaviour
 		{
 			float direction = ( controlAxis.GetValue( calibratedVariable ) < controlAxis.GetMinValue( calibratedVariable ) ) ? -1.0f : 1.0f;
 			controlAxis.SetMaxValue( calibratedVariable, controlAxis.GetValue( calibratedVariable ) );
-			controlAxis.SetScale( direction / ( controlAxis.GetMaxValue( calibratedVariable ) - controlAxis.GetMinValue( calibratedVariable ) ) );
+			controlAxis.SetScale( 2.0f * direction / ( controlAxis.GetMaxValue( calibratedVariable ) - controlAxis.GetMinValue( calibratedVariable ) ) );
 			AdjustSlider();
 		}
 	}
@@ -143,7 +143,7 @@ public class Configuration : MonoBehaviour
 		{
 			float direction = ( controlAxis.GetValue( calibratedVariable ) > controlAxis.GetMaxValue( calibratedVariable ) ) ? -1.0f : 1.0f;
 			controlAxis.SetMinValue( calibratedVariable, controlAxis.GetValue( calibratedVariable ) );
-			controlAxis.SetScale( direction / ( controlAxis.GetMaxValue( calibratedVariable ) - controlAxis.GetMinValue( calibratedVariable ) ) );
+			controlAxis.SetScale( 2.0f * direction / ( controlAxis.GetMaxValue( calibratedVariable ) - controlAxis.GetMinValue( calibratedVariable ) ) );
 			AdjustSlider();
 		}
 	}
