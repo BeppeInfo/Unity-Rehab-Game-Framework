@@ -39,8 +39,8 @@ public class BoxClashClient : GameClient
 		//else if( error >= PositionPositionPlayerController.ERROR_THRESHOLD ) sliderHandle.color = Color.yellow;
 		//else sliderHandle.color = Color.green;
 
-		localPlayerText.text = string.Format( "Input:{0:F3}N\nInteract:{1:F3}N", player.GetOutputForce() );
-		remotePlayerText.text = string.Format( "Position:{0:F3}\nVelocity:{2:F3}", player.GetRelativePosition(), player.GetVelocity() );
+		localPlayerText.text = string.Format( "Output Force:{0:F3}N", player.GetOutputForce() );
+		remotePlayerText.text = string.Format( "Position:{0:F3}\nVelocity:{1:F3}", player.GetRelativePosition(), player.GetVelocity() );
 	}
 
 	IEnumerator RegisterValues()

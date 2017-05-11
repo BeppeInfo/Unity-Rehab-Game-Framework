@@ -20,6 +20,6 @@ public class ForceArrowScaler : MonoBehaviour
 		//transform.localScale = Vector3.one * scale;
 
 		if( GameManager.isMaster ) transform.localScale = Vector3.one * master.GetInputForce();
-		else transform.localScale = Vector3.one * player.GetPlayerForce();
+		else transform.localScale = Vector3.one * player.GetOutputForce();
 	}
 }

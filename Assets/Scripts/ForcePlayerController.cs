@@ -3,9 +3,7 @@ using UnityEngine.UI;
 
 public class ForcePlayerController : Controller
 {
-	private const float DRIFT_CORRECTION_GAIN = 0.1;
-
-	protected float waveImpedance = 10.0f;
+	private const float DRIFT_CORRECTION_GAIN = 0.1f;
 
 	private InputAxis controlAxis = null;
 
@@ -23,19 +21,19 @@ public class ForcePlayerController : Controller
 		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
 		float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
 
-		outputForce = controlAxis.GetValue( AxisVariable.FORCE ) * transform.forward.z;
+		outputForce = controlAxis.GetScaledValue( AxisVariable.FORCE ) * rangeLimits.z * transform.forward.z;
 		outputForceIntegral += outputForce * Time.fixedDeltaTime;
 
-		inputVelocity = ( Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveVariable - outputForce ) / waveImpedance;
-		inputPosition = ( Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveIntegral - outputForceIntegral ) / waveImpedance;
+		inputVelocity = ( Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveVariable - outputForce ) / Controller.WaveImpedance;
+		inputPosition = ( Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveIntegral - outputForceIntegral ) / Controller.WaveImpedance;
 
 		if( inputWaveVariable != 0.0f ) body.velocity = Vector3.forward * ( inputVelocity + DRIFT_CORRECTION_GAIN * ( inputPosition - body.position.z ) );
 
 		float relativeSetpoint = ( body.position.z - initialPosition.z ) / rangeLimits.z / transform.forward.z;
-		controlAxis.SetNormalizedValue( AxisVariable.POSITION, relativeSetpoint );
+		controlAxis.SetScaledValue( AxisVariable.POSITION, relativeSetpoint );
 
-		float outputWaveVariable = inputWaveVariable - Mathf.Sqrt( 2.0f / waveImpedance ) * outputForce;
-		float outputWaveIntegral = inputWaveIntegral - Mathf.Sqrt( 2.0f / waveImpedance ) * outputForceIntegral;
+		float outputWaveVariable = inputWaveVariable - Mathf.Sqrt( 2.0f / Controller.WaveImpedance ) * outputForce;
+		float outputWaveIntegral = inputWaveIntegral - Mathf.Sqrt( 2.0f / Controller.WaveImpedance ) * outputForceIntegral;
 
 		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE, outputWaveVariable );
 		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE_INTEGRAL, outputWaveIntegral );

@@ -35,7 +35,7 @@ public class PositionPlayerController : Controller
 	{
 		if( controlAxis != null )
 		{
-			float input = controlAxis.GetNormalizedValue( AxisVariable.POSITION );
+			float input = controlAxis.GetScaledValue( AxisVariable.POSITION );
 			Vector3 newPosition = transform.right * ( Mathf.Clamp( input, -1.0f, 1.0f ) * rangeLimits.x ) + initialPosition;
 			Vector3 newVelocity = ( newPosition - body.position ) / Time.fixedDeltaTime;
 			Vector3 newAcceleration = ( newVelocity - body.velocity ) / Time.fixedDeltaTime;
@@ -87,8 +87,8 @@ public class PositionPlayerController : Controller
 		if( controlAxis != null && helperEnabled && error > ERROR_THRESHOLD )
 		{
 			//Debug.Log( "Outside move box: (error: " + error.ToString() + ")" );
-			controlAxis.SetNormalizedValue( AxisVariable.POSITION, currentSetpoint / maxSetpoint );
-			//controlAxis.SetNormalizedValue( AxisVariable.VELOCITY, ( targetSetpoint - movementInitialPosition ) / ( MAX_MOVEMENT_TIME * maxSetpoint ) );
+			controlAxis.SetScaledValue( AxisVariable.POSITION, currentSetpoint / maxSetpoint );
+			//controlAxis.SetScaledValue( AxisVariable.VELOCITY, ( targetSetpoint - movementInitialPosition ) / ( MAX_MOVEMENT_TIME * maxSetpoint ) );
 			controlAxis.SetValue( AxisVariable.STIFFNESS, 30.0f );
 
 			moveBoxRenderer.material.color = new Color( 1.0f, 0.0f, 0.0f, 0.5f );
@@ -116,11 +116,11 @@ public class PositionPlayerController : Controller
 
     void OnTriggerEnter( Collider collider )
     {
-		if( enabled ) controlAxis.SetNormalizedValue( AxisVariable.FORCE, -body.velocity.normalized.magnitude );
+		if( enabled ) controlAxis.SetScaledValue( AxisVariable.FORCE, -body.velocity.normalized.magnitude );
     }
 
 	void OnTriggerExit( Collider collider )
     {
-		if( enabled ) controlAxis.SetNormalizedValue( AxisVariable.FORCE, 0.0f );
+		if( enabled ) controlAxis.SetScaledValue( AxisVariable.FORCE, 0.0f );
     }
 }

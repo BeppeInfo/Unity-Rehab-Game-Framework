@@ -11,10 +11,12 @@ public class InputAxis
 	protected string id;
 	public string ID { get { return id; } }
 
+	protected float scale = 1.0f;
+
 	protected class InputAxisValue
 	{
 		public float current = 0.0f, setpoint = 0.0f;
-		public float max = 1.0f, min = -1.0f, range = 2.0f;
+		public float min = Mathf.NegativeInfinity, max = Mathf.Infinity;
 		public float offset = 0.0f;
 	}
 
@@ -34,11 +36,12 @@ public class InputAxis
 
 	public void Reset()
 	{
+		scale = 1.0f;
+
 		foreach( InputAxisValue value in inputValues )
 		{
-			value.max = 1.0f;
-			value.min = -1.0f;
-			value.range = 2.0f;
+			value.min = Mathf.NegativeInfinity;
+			value.max = Mathf.Infinity;
 			value.offset = 0.0f;
 		}
 	}
@@ -48,40 +51,43 @@ public class InputAxis
 	public float GetValue( AxisVariable variable ) { return inputValues[ (int) variable ].current - inputValues[ (int) variable ].offset; }
 	public void SetValue( AxisVariable variable, float value ) 
 	{ 
-		inputValues[ (int) variable ].setpoint = value + inputValues[ (int) variable ].offset; 
+		value += inputValues[ (int) variable ].offset;
+		value = Mathf.Clamp( value, inputValues[ (int) variable ].min, inputValues[ (int) variable ].max );
+		inputValues[ (int) variable ].setpoint = value;
 	}
 
-	public float GetNormalizedValue( AxisVariable variable ) 
+	public float GetScaledValue( AxisVariable variable ) { return Mathf.Clamp( GetValue( variable ), inputValues[ (int) variable ].min, inputValues[ (int) variable ].max ) * scale; } 
+	public void SetScaledValue( AxisVariable variable, float scaledValue ) { SetValue( variable, scaledValue / scale ); }
+
+	public float GetScale() { return scale; } 
+	public void SetScale( float newScale )
 	{
-		InputAxisValue value = inputValues[ (int) variable ];
-		return ( 2.0f * ( value.current - value.offset - value.min ) / value.range - 1.0f ); 
-	}
-	public void SetNormalizedValue( AxisVariable variable, float normalizedValue ) 
-	{ 
-		InputAxisValue value = inputValues[ (int) variable ];
-		value.setpoint = ( ( normalizedValue + 1.0f ) * value.range / 2.0f ) + value.offset + value.min; 
-		Debug.Log( "Returning setpoint: " + value.setpoint.ToString() );
+		if( Mathf.Approximately( newScale, 0.0f ) ) scale = 1.0f;
+		else scale = newScale;
 	}
 
-	public float GetMinValue( AxisVariable variable ) {	return inputValues[ (int) variable ].min; }
-	public float GetMaxValue( AxisVariable variable ) {	return inputValues[ (int) variable ].max; }
+	public float GetMinValue( AxisVariable variable ) { return inputValues[ (int) variable ].min; }
+	public float GetMaxValue( AxisVariable variable ) { return inputValues[ (int) variable ].max; }
 
 	public void SetMinValue( AxisVariable variable, float value ) 
 	{ 
 		inputValues[ (int) variable ].min = value;
-		Calibrate( variable );
+		AdjustRange( variable );
 	}
 	public void SetMaxValue( AxisVariable variable, float value ) 
 	{ 
 		inputValues[ (int) variable ].max = value;
-		Calibrate( variable );
+		AdjustRange( variable );
 	}
 
-	private void Calibrate( AxisVariable variable )
+	private void AdjustRange( AxisVariable variable ) 
 	{
-		InputAxisValue value = inputValues[ (int) variable ];
-		value.range = value.max - value.min;
-		if( Mathf.Approximately( value.range, 0.0f ) ) value.range = 1.0f;
+		if( inputValues[ (int) variable ].min > inputValues[ (int) variable ].max )
+		{
+			float aux = inputValues[ (int) variable ].min;
+			inputValues[ (int) variable ].min = inputValues[ (int) variable ].max;
+			inputValues[ (int) variable ].max = aux;
+		}
 	}
 		
 	public void SetOffset() 
@@ -130,10 +136,6 @@ public class KeyboardInputAxis : InputAxis
 	{
 		inputValues[ (int) AxisVariable.VELOCITY ].current = Input.GetAxis( id );
 		inputValues[ (int) AxisVariable.POSITION ].current += inputValues[ (int) AxisVariable.VELOCITY ].current * updateTime;
-		if( inputValues[ (int) AxisVariable.POSITION ].current > inputValues[ (int) AxisVariable.POSITION ].max )
-			inputValues[ (int) AxisVariable.POSITION ].current = inputValues[ (int) AxisVariable.POSITION ].max;
-		else if( inputValues[ (int) AxisVariable.POSITION ].current < inputValues[ (int) AxisVariable.POSITION ].min )
-			inputValues[ (int) AxisVariable.POSITION ].current = inputValues[ (int) AxisVariable.POSITION ].min;
 		inputValues[ (int) AxisVariable.FORCE ].current = inputValues[ (int) AxisVariable.VELOCITY ].current;
 	}
 }
@@ -161,12 +163,18 @@ public class RemoteInputAxis : InputAxis
 
 	public const string AXIS_SERVER_HOST_ID = "Axis Server Host";
 
+	public const byte COMMAND_DISABLE = 1, COMMAND_ENABLE = 2, COMMAND_RESET = 3, COMMAND_OPERATE = 4, COMMAND_OFFSET = 5, COMMAND_CALIBRATE = 6, COMMAND_PREPROCESS = 7, COMMAND_SET_USER = 8;
+
 	const int AXIS_DATA_LENGTH = sizeof(byte) + 6 * sizeof(float);
 
 	private static List<AxisConnection> axisConnections = new List<AxisConnection>();
 
 	private byte index;
+	public byte Index { get { return index; } }
+
 	private AxisConnection connection;
+
+	private float[] previousSetpoints = new float[ Enum.GetValues(typeof(AxisVariable)).Length ];
 
 	public override bool Init( string axisID )
 	{
@@ -225,8 +233,10 @@ public class RemoteInputAxis : InputAxis
 		for( int valueIndex = 0; valueIndex < inputValues.Length; valueIndex++ )
 		{
 			int outputValuePosition = outputDataPosition + valueIndex * sizeof(float);
-			/*float valueDelta = Mathf.Abs( inputValues[ valueIndex ].setpoint - BitConverter.ToSingle( connection.outputBuffer, outputValuePosition ) );
-			if( valueDelta / inputValues[ valueIndex ].range > 0.05f )*/ hasOutputChanged = true;
+			float oldSetpoint = previousSetpoints[ valueIndex ];
+			float setpointDelta = inputValues[ valueIndex ].setpoint - oldSetpoint;
+			if( Mathf.Abs( setpointDelta / scale ) > 0.01f ) hasOutputChanged = true;
+			if( valueIndex == 0 ) Debug.Log( string.Format( "checking {0}: {1} - ({2}) = {3} ({4})", index, inputValues[ valueIndex ].setpoint, oldSetpoint, setpointDelta, hasOutputChanged ) );
 		}
 
 		if( hasOutputChanged ) 
@@ -236,6 +246,7 @@ public class RemoteInputAxis : InputAxis
 			{
 				int outputValuePosition = outputDataPosition + valueIndex * sizeof(float);
 				Buffer.BlockCopy( BitConverter.GetBytes( inputValues[ valueIndex ].setpoint ), 0, connection.outputBuffer, outputValuePosition, sizeof(float) );
+				previousSetpoints[ valueIndex ] = inputValues[ valueIndex ].setpoint;
 			}
 			connection.changedOutputsCount++;
 		}

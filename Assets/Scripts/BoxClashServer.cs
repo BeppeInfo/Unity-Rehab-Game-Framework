@@ -21,7 +21,7 @@ public class BoxClashServer : GameServer
 
 	void Update()
 	{
-		infoText.text = string.Format( "Position 1: {1:F3}\nPosition 2 {3:F3}", boxes[ 0 ].GetPosition(), boxes[ 1 ].GetPosition() );
+		infoText.text = string.Format( "Position 1: {0:F3}\nPosition 2 {1:F3}", boxes[ 0 ].GetPosition(), boxes[ 1 ].GetPosition() );
 	}
 
 	IEnumerator WaitClients()

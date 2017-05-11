@@ -14,6 +14,9 @@ public abstract class Controller : MonoBehaviour
 	protected const int FORCE = 2, MOMENTUM = 3;
 	protected const int WAVE = 2, WAVE_INTEGRAL = 3;
 
+	private static float waveImpedance = 5.0f;
+	public static float WaveImpedance { get { return waveImpedance; } set { waveImpedance = Mathf.Clamp( value, 1.0f, 20.0f ); } }
+
 	public Collider boundaries;
     protected Vector3 rangeLimits = new Vector3( 7.5f, 0.0f, 7.5f );
 

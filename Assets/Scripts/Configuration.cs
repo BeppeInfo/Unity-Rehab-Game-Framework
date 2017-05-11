@@ -38,6 +38,7 @@ public class Configuration : MonoBehaviour
 		axisSelector.AddOptions( InputAxisManager.DEFAULT_AXIS_NAMES );
 
         SetSelectedAxis( 0 );
+		ResetAxisValues();
 
 		axisServerEntry.text = PlayerPrefs.GetString( RemoteInputAxis.AXIS_SERVER_HOST_ID, Configuration.DEFAULT_IP_HOST );
 		gameServerEntry.text = PlayerPrefs.GetString( GameClientConnection.SERVER_HOST_ID, Configuration.DEFAULT_IP_HOST );
@@ -70,11 +71,17 @@ public class Configuration : MonoBehaviour
 
     public void SetSelectedAxis( Int32 typeIndex )
     {
+		//if( controlAxis.GetType() == typeof(RemoteInputAxis) ) 
+		//	infoStateClient.SendData( new byte[] { 1, ((RemoteInputAxis) controlAxis).Index, RemoteInputAxis.COMMAND_OPERATE } );
 		controlAxis = axisManager.GetAxis( axisSelector.captionText.text );
+		if( controlAxis.GetType() == typeof(RemoteInputAxis) ) 
+			infoStateClient.SendData( new byte[] { 1, ((RemoteInputAxis) controlAxis).Index, RemoteInputAxis.COMMAND_CALIBRATE } );
 	}
 
 	public static InputAxis GetSelectedAxis()
 	{
+		//if( controlAxis.GetType() == typeof(RemoteInputAxis) ) 
+		//	infoStateClient.SendData( new byte[] { 1, ((RemoteInputAxis) controlAxis).Index, RemoteInputAxis.COMMAND_OPERATE } );
 		return controlAxis;
 	}
 
@@ -122,8 +129,10 @@ public class Configuration : MonoBehaviour
 		Debug.Log( "Set axis Max" );
 		if( controlAxis != null ) 
 		{
-			controlAxis.SetMaxValue( calibratedVariable, calibrationSlider.value );
-			SetSliderLimits();
+			float direction = ( controlAxis.GetValue( calibratedVariable ) < controlAxis.GetMinValue( calibratedVariable ) ) ? -1.0f : 1.0f;
+			controlAxis.SetMaxValue( calibratedVariable, controlAxis.GetValue( calibratedVariable ) );
+			controlAxis.SetScale( direction / ( controlAxis.GetMaxValue( calibratedVariable ) - controlAxis.GetMinValue( calibratedVariable ) ) );
+			AdjustSlider();
 		}
 	}
 
@@ -132,31 +141,25 @@ public class Configuration : MonoBehaviour
 		Debug.Log( "Set axis Min" );
 		if( controlAxis != null ) 
 		{
-			controlAxis.SetMinValue( calibratedVariable, calibrationSlider.value );
-			SetSliderLimits();
+			float direction = ( controlAxis.GetValue( calibratedVariable ) > controlAxis.GetMaxValue( calibratedVariable ) ) ? -1.0f : 1.0f;
+			controlAxis.SetMinValue( calibratedVariable, controlAxis.GetValue( calibratedVariable ) );
+			controlAxis.SetScale( direction / ( controlAxis.GetMaxValue( calibratedVariable ) - controlAxis.GetMinValue( calibratedVariable ) ) );
+			AdjustSlider();
 		}
 	}
 
-	private void SetSliderLimits()
+	private void AdjustSlider()
 	{
-		float maxValue = controlAxis.GetMaxValue( calibratedVariable );
-		float minValue = controlAxis.GetMinValue( calibratedVariable );
-		if( maxValue > minValue )
-		{
-			calibrationSlider.maxValue = maxValue;
-			calibrationSlider.minValue = minValue;
-		}
-		else
-		{
-			calibrationSlider.maxValue = minValue;
-			calibrationSlider.minValue = maxValue;
-		}
+		calibrationSlider.minValue = controlAxis.GetMinValue( calibratedVariable );
+		calibrationSlider.maxValue = controlAxis.GetMaxValue( calibratedVariable );
+		if( controlAxis.GetScale() > 0 ) calibrationSlider.direction = Slider.Direction.LeftToRight;
+		else calibrationSlider.direction = Slider.Direction.RightToLeft;
 	}
 
 	public void SetCalibratedVariable( Int32 variableIndex )
 	{
 		calibratedVariable = (AxisVariable) variableIndex;
-		if( controlAxis != null ) SetSliderLimits();
+		if( controlAxis != null ) AdjustSlider();
 		setpointToggle.isOn = false;
 	}
 
@@ -165,7 +168,8 @@ public class Configuration : MonoBehaviour
 		yield return new WaitForSecondsRealtime( 1.0f );
 
 		Debug.Log( "Offset end" );
-		if( controlAxis.GetType() == typeof(RemoteInputAxis) ) infoStateClient.SendData( new byte[] { 1, 0, 4 } );
+		if( controlAxis.GetType() == typeof(RemoteInputAxis) ) 
+			infoStateClient.SendData( new byte[] { 1, ((RemoteInputAxis) controlAxis).Index, RemoteInputAxis.COMMAND_CALIBRATE } );
 		controlAxis.SetOffset();
 	}
 
@@ -174,8 +178,8 @@ public class Configuration : MonoBehaviour
 		Debug.Log( "Offset begin" );
 		if( controlAxis != null )
 		{
-			if( controlAxis.GetType() == typeof(RemoteInputAxis) ) infoStateClient.SendData( new byte[] { 1, 0, 5 } );
-
+			if( controlAxis.GetType() == typeof(RemoteInputAxis) ) 
+				infoStateClient.SendData( new byte[] { 1, ((RemoteInputAxis) controlAxis).Index, RemoteInputAxis.COMMAND_OFFSET } );
 			StartCoroutine( WaitForOffset() );
 		}
 	}
@@ -183,21 +187,31 @@ public class Configuration : MonoBehaviour
 	public void ResetAxisValues()
 	{
 		if( controlAxis != null ) controlAxis.Reset();
+		AdjustSlider();
+		calibrationSlider.minValue = -1.0f;
+		calibrationSlider.maxValue = 1.0f;
 	}
 
 	public void SetAxisControl( bool enabled )
 	{
 		calibrationSlider.interactable = enabled;
+		if( controlAxis.GetType() == typeof(RemoteInputAxis) ) 
+			infoStateClient.SendData( new byte[] { 1, ((RemoteInputAxis) controlAxis).Index, enabled ? RemoteInputAxis.COMMAND_OPERATE : RemoteInputAxis.COMMAND_CALIBRATE } );
 	}
 
 	public void SetSetpoint( float setpoint )
 	{
-		//Debug.Log( "Setting setpoint: " + setpoint.ToString() );
-		if( calibrationSlider.interactable ) controlAxis.SetValue( calibratedVariable, setpoint );
+		if( calibrationSlider.interactable ) 
+		{
+			Debug.Log( "Setting setpoint: " + setpoint.ToString() );
+			controlAxis.SetValue( calibratedVariable, setpoint );
+		}
 	}
 
 	public void EndConfiguration()
     {
+		if( controlAxis.GetType() == typeof(RemoteInputAxis) ) 
+			infoStateClient.SendData( new byte[] { 1, ((RemoteInputAxis) controlAxis).Index, RemoteInputAxis.COMMAND_OPERATE } );
 		infoStateClient.Disconnect();
 		GameManager.isMaster = false;
     }

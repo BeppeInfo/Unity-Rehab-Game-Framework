@@ -2147,10 +2147,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7071eaa649bb84171a1e7bab87534251, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameTitles:
-  - Double Pong
-  - 
-  - 
 --- !u!1 &772456472
 GameObject:
   m_ObjectHideFlags: 0
@@ -6600,7 +6596,7 @@ MonoBehaviour:
   m_MinValue: -1
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0
+  m_Value: -1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
