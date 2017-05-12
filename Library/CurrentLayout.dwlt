@@ -201,8 +201,8 @@ MonoBehaviour:
     y: 0
     width: 1247
     height: 541
-  m_MinSize: {x: 200, y: 200}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 204, y: 221}
+  m_MaxSize: {x: 4004, y: 4021}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -367,7 +367,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 1667ffffc867ffff7268ffff8268ffffa868ffff74dfffff26e0ffffd0e0ffffe0e0ffff06e1ffffe0f8ffffbaf9ffff64faffff74faffff9afaffffe8fbffff000000002c2e0000ce380000
+    m_ExpandedIDs: c8f6ffffa2f7ffff4ef8ffff60f8ffff88f8ffffe8fbffff00000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -422,9 +422,9 @@ MonoBehaviour:
   m_isRotationLocked: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 612.7012, y: 452.41486, z: 49.118713}
+    m_Target: {x: 462.64624, y: 432.90546, z: 30.503601}
     speed: 2
-    m_Value: {x: 612.7012, y: 452.41486, z: 49.118713}
+    m_Value: {x: 462.64624, y: 432.90546, z: 30.503601}
   m_RenderMode: 0
   m_ValidateTrueMetals: 0
   m_SceneViewState:
@@ -553,18 +553,18 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Games
+    - Assets/Scripts
   m_ViewMode: 1
   m_StartGridSize: 56
   m_LastFolders:
-  - Assets/Games
+  - Assets/Scripts
   m_LastFoldersGridSize: 56
   m_LastProjectPath: C:\Users\Adriano\Documents\Leonardo Jose\Unity-Rehab-Game-Framework
   m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 5a250000
-    m_LastClickedID: 9562
+    m_SelectedIDs: aa250000
+    m_LastClickedID: 9642
     m_ExpandedIDs: 00000000f42400009c250000c425000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -620,7 +620,7 @@ MonoBehaviour:
   m_ListAreaState:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 1
+    m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: 5e250000c0220000282800002c29000000000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0

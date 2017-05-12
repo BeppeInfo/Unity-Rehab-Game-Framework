@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class ForcePlayerController : Controller
 {
-	private const float DRIFT_CORRECTION_GAIN = 0.1f;
+	private const float DRIFT_CORRECTION_GAIN = 0.0f; // Increase for position error correction
 
 	private InputAxis controlAxis = null;
 
@@ -12,7 +12,6 @@ public class ForcePlayerController : Controller
 
 	void Start()
 	{
-		//body.isKinematic = true;
 		initialPosition = body.position;
 	}
 

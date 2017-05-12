@@ -188,8 +188,6 @@ public class Configuration : MonoBehaviour
 	{
 		if( controlAxis != null ) controlAxis.Reset();
 		AdjustSlider();
-		calibrationSlider.minValue = -1.0f;
-		calibrationSlider.maxValue = 1.0f;
 	}
 
 	public void SetAxisControl( bool enabled )
