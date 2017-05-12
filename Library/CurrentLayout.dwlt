@@ -367,7 +367,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: c8f6ffffa2f7ffff4ef8ffff60f8ffff88f8ffffe8fbffff00000000
+    m_ExpandedIDs: 1cf4ffffcef4ffff7cf5ffff90f5ffffbaf5ffffacf6ffffe8faffffe8fbffff00000000002800000e290000fa290000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -422,9 +422,9 @@ MonoBehaviour:
   m_isRotationLocked: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 462.64624, y: 432.90546, z: 30.503601}
+    m_Target: {x: 429.0225, y: 316.6068, z: -108.55954}
     speed: 2
-    m_Value: {x: 462.64624, y: 432.90546, z: 30.503601}
+    m_Value: {x: 429.0225, y: 316.6068, z: -108.55954}
   m_RenderMode: 0
   m_ValidateTrueMetals: 0
   m_SceneViewState:
@@ -447,9 +447,9 @@ MonoBehaviour:
       speed: 2
       m_Value: 0
   m_Rotation:
-    m_Target: {x: -0.3718495, y: -0.0000001376899, z: 0.00000006029161, w: -0.92829293}
+    m_Target: {x: -0.46943957, y: 0.031773906, z: -0.016907055, w: -0.88223076}
     speed: 2
-    m_Value: {x: -0.3718495, y: -0.0000001376899, z: 0.00000006029161, w: -0.92829293}
+    m_Value: {x: -0.46943957, y: 0.031773906, z: -0.016907055, w: -0.88223076}
   m_Size:
     m_Target: 836.61194
     speed: 2
@@ -553,18 +553,18 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Scripts
+    - Assets/Games
   m_ViewMode: 1
   m_StartGridSize: 56
   m_LastFolders:
-  - Assets/Scripts
+  - Assets/Games
   m_LastFoldersGridSize: 56
   m_LastProjectPath: C:\Users\Adriano\Documents\Leonardo Jose\Unity-Rehab-Game-Framework
   m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: aa250000
-    m_LastClickedID: 9642
+    m_SelectedIDs: 5a250000
+    m_LastClickedID: 9562
     m_ExpandedIDs: 00000000f42400009c250000c425000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -620,7 +620,7 @@ MonoBehaviour:
   m_ListAreaState:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 0
+    m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: 5e250000c0220000282800002c29000000000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
