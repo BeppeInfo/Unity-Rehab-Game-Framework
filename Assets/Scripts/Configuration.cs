@@ -131,7 +131,7 @@ public class Configuration : MonoBehaviour
 		{
 			float direction = ( controlAxis.GetValue( calibratedVariable ) < controlAxis.GetMinValue( calibratedVariable ) ) ? -1.0f : 1.0f;
 			controlAxis.SetMaxValue( calibratedVariable, controlAxis.GetValue( calibratedVariable ) );
-			controlAxis.SetScale( 2.0f * direction / ( controlAxis.GetMaxValue( calibratedVariable ) - controlAxis.GetMinValue( calibratedVariable ) ) );
+			controlAxis.SetAxisScale( 2.0f * direction );
 			AdjustSlider();
 		}
 	}
@@ -143,7 +143,7 @@ public class Configuration : MonoBehaviour
 		{
 			float direction = ( controlAxis.GetValue( calibratedVariable ) > controlAxis.GetMaxValue( calibratedVariable ) ) ? -1.0f : 1.0f;
 			controlAxis.SetMinValue( calibratedVariable, controlAxis.GetValue( calibratedVariable ) );
-			controlAxis.SetScale( 2.0f * direction / ( controlAxis.GetMaxValue( calibratedVariable ) - controlAxis.GetMinValue( calibratedVariable ) ) );
+			controlAxis.SetAxisScale( 2.0f * direction );
 			AdjustSlider();
 		}
 	}
@@ -152,7 +152,7 @@ public class Configuration : MonoBehaviour
 	{
 		calibrationSlider.minValue = controlAxis.GetMinValue( calibratedVariable );
 		calibrationSlider.maxValue = controlAxis.GetMaxValue( calibratedVariable );
-		if( controlAxis.GetScale() > 0 ) calibrationSlider.direction = Slider.Direction.LeftToRight;
+		if( controlAxis.GetAxisScale() > 0.0f ) calibrationSlider.direction = Slider.Direction.LeftToRight;
 		else calibrationSlider.direction = Slider.Direction.RightToLeft;
 	}
 
@@ -170,7 +170,7 @@ public class Configuration : MonoBehaviour
 		Debug.Log( "Offset end" );
 		if( controlAxis.GetType() == typeof(RemoteInputAxis) ) 
 			infoStateClient.SendData( new byte[] { 1, ((RemoteInputAxis) controlAxis).Index, RemoteInputAxis.COMMAND_CALIBRATE } );
-		controlAxis.SetOffset();
+		controlAxis.AdjustOffset();
 	}
 
 	public void GetAxisOffset()

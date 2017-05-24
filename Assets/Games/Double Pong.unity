@@ -121,6 +121,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 4
   boundaries: {fileID: 1464675926}
+  initialPosition: {x: 0, y: 0, z: 0}
   speed: 5
 --- !u!1 &87474705
 GameObject:
@@ -589,6 +590,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 1
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &367160704
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -603,6 +605,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 1
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
   moveBoxRenderer: {fileID: 1312647344}
   moveBoxPlane: {fileID: 1312647345}
 --- !u!1 &382993915
@@ -1446,6 +1449,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 3
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &992508007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1460,6 +1464,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 3
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
   moveBoxRenderer: {fileID: 1748196676}
   moveBoxPlane: {fileID: 1748196677}
 --- !u!1 &1036808211
@@ -1851,6 +1856,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 0
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &1366582289
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2038,6 +2044,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 0
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &1403583063
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2052,6 +2059,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 0
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
   moveBoxRenderer: {fileID: 1312647344}
   moveBoxPlane: {fileID: 1312647345}
 --- !u!1 &1464675923
@@ -2301,6 +2309,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 4
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!1 &1608433774
 GameObject:
   m_ObjectHideFlags: 0
@@ -2337,6 +2346,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 3
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &1608433776
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3030,6 +3040,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 1
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &1818957270
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3284,6 +3295,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 2
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!54 &2054594204
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3382,6 +3394,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 2
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &2065377133
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3396,6 +3409,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   elementID: 2
   boundaries: {fileID: 395675361}
+  initialPosition: {x: 0, y: 0, z: 0}
   moveBoxRenderer: {fileID: 1748196676}
   moveBoxPlane: {fileID: 1748196677}
 --- !u!1 &2105704037

@@ -28,8 +28,8 @@ public class ForcePlayerController : Controller
 
 		if( inputWaveVariable != 0.0f ) body.velocity = Vector3.forward * ( inputVelocity + DRIFT_CORRECTION_GAIN * ( inputPosition - body.position.z ) );
 
-		float relativeSetpoint = ( body.position.z - initialPosition.z ) /*/ rangeLimits.z*/ / transform.forward.z;
-		controlAxis.SetScaledValue( AxisVariable.POSITION, relativeSetpoint );
+		float relativeSetpoint = ( body.position.z - initialPosition.z ) / rangeLimits.z / transform.forward.z;
+		controlAxis.SetScaledValue( AxisVariable.POSITION, Mathf.Clamp( relativeSetpoint, -1.0f, 1.0f ) );
 
 		float outputWaveVariable = inputWaveVariable - Mathf.Sqrt( 2.0f / Controller.WaveImpedance ) * outputForce;
 		float outputWaveIntegral = inputWaveIntegral - Mathf.Sqrt( 2.0f / Controller.WaveImpedance ) * outputForceIntegral;

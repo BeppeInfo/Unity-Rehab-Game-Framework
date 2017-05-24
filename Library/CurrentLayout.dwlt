@@ -20,7 +20,7 @@ MonoBehaviour:
   m_ShowMode: 4
   m_Title: 
   m_RootView: {fileID: 2}
-  m_MinSize: {x: 950, y: 300}
+  m_MinSize: {x: 950, y: 542}
   m_MaxSize: {x: 10000, y: 10000}
 --- !u!114 &2
 MonoBehaviour:
@@ -109,7 +109,7 @@ MonoBehaviour:
   m_MinSize: {x: 683, y: 492}
   m_MaxSize: {x: 14004, y: 14042}
   vertical: 0
-  controlID: 9
+  controlID: 49
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -133,7 +133,7 @@ MonoBehaviour:
   m_MinSize: {x: 406, y: 492}
   m_MaxSize: {x: 10002, y: 14042}
   vertical: 1
-  controlID: 10
+  controlID: 50
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -157,7 +157,7 @@ MonoBehaviour:
   m_MinSize: {x: 406, y: 221}
   m_MaxSize: {x: 8006, y: 4021}
   vertical: 0
-  controlID: 11
+  controlID: 51
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -254,8 +254,8 @@ MonoBehaviour:
     y: 0
     width: 389
     height: 947
-  m_MinSize: {x: 275, y: 50}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 277, y: 71}
+  m_MaxSize: {x: 4002, y: 4021}
   m_ActualView: {fileID: 18}
   m_Panes:
   - {fileID: 18}
@@ -367,7 +367,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 1cf4ffffcef4ffff7cf5ffff90f5ffffbaf5ffffacf6ffffe8faffffe8fbffff00000000002800000e290000fa290000
+    m_ExpandedIDs: d8d5ffffb0d6ffff66d7ffff6cd7ffff92d7ffff68e3ffff40e4fffff6e4fffffce4ffff22e5ffff02f0ffffdaf0ffff94f1ffff9ef1ffffc8f1ffffeaf7ffffc2f8ffff7cf9ffff86f9ffffb0f9ffffe8fbffff0000000096380000a439000034460000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -386,7 +386,7 @@ MonoBehaviour:
       m_ClientGUIView: {fileID: 8}
     m_SearchString: 
   m_ExpandedScenes:
-  - Box Clash
+  - Double Pong
   m_CurrenRootInstanceID: 0
   m_Locked: 0
   m_CurrentSortingName: TransformSorting
@@ -417,14 +417,14 @@ MonoBehaviour:
     width: 1243
     height: 520
   m_SceneLighting: 1
-  lastFramingTime: 61.96792510413859
+  lastFramingTime: 12315.669243652224
   m_2DMode: 0
   m_isRotationLocked: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 429.0225, y: 316.6068, z: -108.55954}
+    m_Target: {x: 0, y: 0, z: 0}
     speed: 2
-    m_Value: {x: 429.0225, y: 316.6068, z: -108.55954}
+    m_Value: {x: 0, y: 0, z: 0}
   m_RenderMode: 0
   m_ValidateTrueMetals: 0
   m_SceneViewState:
@@ -447,13 +447,13 @@ MonoBehaviour:
       speed: 2
       m_Value: 0
   m_Rotation:
-    m_Target: {x: -0.46943957, y: 0.031773906, z: -0.016907055, w: -0.88223076}
+    m_Target: {x: -0.47503167, y: 0.0013198222, z: -0.00071247143, w: -0.87996745}
     speed: 2
-    m_Value: {x: -0.46943957, y: 0.031773906, z: -0.016907055, w: -0.88223076}
+    m_Value: {x: -0.47503167, y: 0.0013198222, z: -0.00071247143, w: -0.87996745}
   m_Size:
-    m_Target: 836.61194
+    m_Target: 51.415417
     speed: 2
-    m_Value: 836.61194
+    m_Value: 51.415417
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -553,19 +553,19 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Games
+    - Assets/Scripts
   m_ViewMode: 1
   m_StartGridSize: 56
   m_LastFolders:
-  - Assets/Games
+  - Assets/Scripts
   m_LastFoldersGridSize: 56
   m_LastProjectPath: C:\Users\Adriano\Documents\Leonardo Jose\Unity-Rehab-Game-Framework
   m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 5a250000
-    m_LastClickedID: 9562
-    m_ExpandedIDs: 00000000f42400009c250000c425000000ca9a3bffffff7f
+    m_SelectedIDs: a8250000
+    m_LastClickedID: 9640
+    m_ExpandedIDs: 00000000f42400009a250000c225000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -593,7 +593,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000f42400009c250000c4250000
+    m_ExpandedIDs: 00000000f42400009a250000c2250000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -624,18 +624,18 @@ MonoBehaviour:
     m_ExpandedInstanceIDs: 5e250000c0220000282800002c29000000000000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: 
-      m_OriginalName: 
+      m_Name: InputAxis
+      m_OriginalName: InputAxis
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 0
+      m_UserData: 1362
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 11
+      m_OriginalEventType: 0
       m_IsRenamingFilename: 1
       m_ClientGUIView: {fileID: 10}
     m_CreateAssetUtility:

@@ -17,6 +17,7 @@ public class InputAxis
 	{
 		public float current = 0.0f, setpoint = 0.0f;
 		public float min = Mathf.NegativeInfinity, max = Mathf.Infinity;
+		public float range = Mathf.Infinity;
 		public float offset = 0.0f;
 	}
 
@@ -56,11 +57,15 @@ public class InputAxis
 		inputValues[ (int) variable ].setpoint = value;
 	}
 
-	public float GetScaledValue( AxisVariable variable ) { return Mathf.Clamp( GetValue( variable ), inputValues[ (int) variable ].min, inputValues[ (int) variable ].max ) * scale; } 
-	public void SetScaledValue( AxisVariable variable, float scaledValue ) { SetValue( variable, scaledValue / scale ); }
+	public float GetScaledValue( AxisVariable variable ) 
+	{
+		float absoluteInputValue = Mathf.Clamp( GetValue( variable ), inputValues[ (int) variable ].min, inputValues[ (int) variable ].max );
+		return absoluteInputValue * scale / inputValues[ (int) variable ].range; 
+	} 
+	public void SetScaledValue( AxisVariable variable, float scaledValue ) { SetValue( variable, scaledValue * inputValues[ (int) variable ].range / scale ); }
 
-	public float GetScale() { return scale; } 
-	public void SetScale( float newScale )
+	public float GetAxisScale() { return scale; } 
+	public void SetAxisScale( float newScale )
 	{
 		if( Mathf.Approximately( newScale, 0.0f ) ) scale = 1.0f;
 		else scale = newScale;
@@ -88,9 +93,11 @@ public class InputAxis
 			inputValues[ (int) variable ].min = inputValues[ (int) variable ].max;
 			inputValues[ (int) variable ].max = aux;
 		}
+		inputValues[ (int) variable ].range = inputValues[ (int) variable ].max - inputValues[ (int) variable ].min;
+		if( Mathf.Approximately( inputValues[ (int) variable ].range, 0.0f )  ) inputValues[ (int) variable ].range = 1.0f;
 	}
 		
-	public void SetOffset() 
+	public void AdjustOffset() 
 	{ 
 		for( int valueIndex = 0; valueIndex < inputValues.Length; valueIndex++ )
 			inputValues[ valueIndex ].offset = inputValues[ valueIndex ].current; 
@@ -235,8 +242,8 @@ public class RemoteInputAxis : InputAxis
 			int outputValuePosition = outputDataPosition + valueIndex * sizeof(float);
 			float oldSetpoint = previousSetpoints[ valueIndex ];
 			float setpointDelta = inputValues[ valueIndex ].setpoint - oldSetpoint;
-			if( Mathf.Abs( setpointDelta / scale ) > 0.01f ) hasOutputChanged = true;
-			if( valueIndex == 0 ) Debug.Log( string.Format( "checking {0}: {1} - ({2}) = {3} ({4})", index, inputValues[ valueIndex ].setpoint, oldSetpoint, setpointDelta, hasOutputChanged ) );
+			if( Mathf.Abs( setpointDelta / inputValues[ valueIndex ].range ) > 0.01f ) hasOutputChanged = true;
+			//if( valueIndex == 0 ) Debug.Log( string.Format( "checking {0}: {1} - ({2}) = {3} ({4})", index, inputValues[ valueIndex ].setpoint, oldSetpoint, setpointDelta, hasOutputChanged ) );
 		}
 
 		if( hasOutputChanged ) 
