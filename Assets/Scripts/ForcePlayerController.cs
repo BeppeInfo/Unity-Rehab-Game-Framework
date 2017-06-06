@@ -17,23 +17,32 @@ public class ForcePlayerController : Controller
 
 	void FixedUpdate()
 	{
+		// Receive u_s (delayed u_m) and U_s (delayed U_m)
 		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
 		float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
 
+		// Read scaled/normalized player force (F_s) value
 		outputForce = controlAxis.GetScaledValue( AxisVariable.FORCE ) /** rangeLimits.z*/ * transform.forward.z;
-		outputForceIntegral += outputForce * Time.fixedDeltaTime;
+        // Integrate force for moment (p_s) calculation
+        outputForceIntegral += outputForce * Time.fixedDeltaTime;
 
+        // x_dot_s = (sqrt(2*b) * u_s - F_s) / b
 		inputVelocity = ( Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveVariable - outputForce ) / Controller.WaveImpedance;
+		// x_s = (sqrt(2*b) * U_s - p_s) / b
 		inputPosition = ( Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveIntegral - outputForceIntegral ) / Controller.WaveImpedance;
 
 		if( inputWaveVariable != 0.0f ) body.velocity = Vector3.forward * ( inputVelocity + DRIFT_CORRECTION_GAIN * ( inputPosition - body.position.z ) );
 
+        // Set robot position setpoint (relative to initial axis/body position)
 		float relativeSetpoint = ( body.position.z - initialPosition.z ) / rangeLimits.z / transform.forward.z;
 		controlAxis.SetScaledValue( AxisVariable.POSITION, Mathf.Clamp( relativeSetpoint, -1.0f, 1.0f ) );
 
+        // v_s = u_s - sqrt(2/b) * F_s
 		float outputWaveVariable = inputWaveVariable - Mathf.Sqrt( 2.0f / Controller.WaveImpedance ) * outputForce;
+		// V_s = U_s - sqrt(2/b) * p_s
 		float outputWaveIntegral = inputWaveIntegral - Mathf.Sqrt( 2.0f / Controller.WaveImpedance ) * outputForceIntegral;
 
+        // Send v_s and V_s
 		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE, outputWaveVariable );
 		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE_INTEGRAL, outputWaveIntegral );
 	}
