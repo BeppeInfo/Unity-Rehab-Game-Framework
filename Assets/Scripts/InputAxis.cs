@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-public enum AxisVariable { POSITION, VELOCITY, FORCE, ACCELERATION, STIFFNESS, DAMPING };
+public enum AxisVariable { POSITION, VELOCITY, FORCE, ACCELERATION, INERTIA, STIFFNESS, DAMPING };
 
 public class InputAxis
 {
@@ -74,33 +74,21 @@ public class InputAxis
 	public float GetMinValue( AxisVariable variable ) { return inputValues[ (int) variable ].min; }
 	public float GetMaxValue( AxisVariable variable ) { return inputValues[ (int) variable ].max; }
 
-	public void SetMinValue( AxisVariable variable, float value ) 
-	{ 
-		inputValues[ (int) variable ].min = value;
-		AdjustRange( variable );
-	}
-	public void SetMaxValue( AxisVariable variable, float value ) 
-	{ 
-		inputValues[ (int) variable ].max = value;
-		AdjustRange( variable );
-	}
-
-	private void AdjustRange( AxisVariable variable ) 
+	public void AdjustRange() 
 	{
-		if( inputValues[ (int) variable ].min > inputValues[ (int) variable ].max )
+		foreach( InputAxisValue value in inputValues )
 		{
-			float aux = inputValues[ (int) variable ].min;
-			inputValues[ (int) variable ].min = inputValues[ (int) variable ].max;
-			inputValues[ (int) variable ].max = aux;
+			value.min = Mathf.Min( value.min, value.current );
+			value.max = Mathf.Max( value.max, value.current );
+			value.range = value.max - value.min;
+			if( Mathf.Approximately( value.range, 0.0f ) ) value.range = 1.0f;
 		}
-		inputValues[ (int) variable ].range = inputValues[ (int) variable ].max - inputValues[ (int) variable ].min;
-		if( Mathf.Approximately( inputValues[ (int) variable ].range, 0.0f )  ) inputValues[ (int) variable ].range = 1.0f;
 	}
 		
 	public void AdjustOffset() 
 	{ 
-		for( int valueIndex = 0; valueIndex < inputValues.Length; valueIndex++ )
-			inputValues[ valueIndex ].offset = inputValues[ valueIndex ].current; 
+		foreach( InputAxisValue value in inputValues )
+			value.offset = value.current; 
 	}
 }
 
@@ -172,7 +160,7 @@ public class RemoteInputAxis : InputAxis
 
 	public const byte COMMAND_DISABLE = 1, COMMAND_ENABLE = 2, COMMAND_RESET = 3, COMMAND_OPERATE = 4, COMMAND_OFFSET = 5, COMMAND_CALIBRATE = 6, COMMAND_PREPROCESS = 7, COMMAND_SET_USER = 8;
 
-	const int AXIS_DATA_LENGTH = sizeof(byte) + 6 * sizeof(float);
+	private readonly int AXIS_DATA_LENGTH = sizeof(byte) + Enum.GetValues(typeof(AxisVariable)).Length * sizeof(float);
 
 	private static List<AxisConnection> axisConnections = new List<AxisConnection>();
 
