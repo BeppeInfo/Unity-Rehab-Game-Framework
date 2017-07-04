@@ -160,7 +160,7 @@ public class RemoteInputAxis : InputAxis
 
 	public const byte COMMAND_DISABLE = 1, COMMAND_ENABLE = 2, COMMAND_RESET = 3, COMMAND_OPERATE = 4, COMMAND_OFFSET = 5, COMMAND_CALIBRATE = 6, COMMAND_PREPROCESS = 7, COMMAND_SET_USER = 8;
 
-	private readonly int AXIS_DATA_LENGTH = sizeof(byte) + Enum.GetValues(typeof(AxisVariable)).Length * sizeof(float);
+	private readonly int AXIS_DATA_LENGTH = sizeof(byte) + /*Enum.GetValues(typeof(AxisVariable)).Length*/7 * sizeof(float);
 
 	private static List<AxisConnection> axisConnections = new List<AxisConnection>();
 

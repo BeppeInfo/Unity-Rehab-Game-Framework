@@ -2,16 +2,26 @@
 
 public class ForceMasterController : Controller
 {
-	float inputForce = 0.0f;
+	float inputPosition = 0.0f, outputForce = 0.0f;
+
+	const float TUNNING_PARAMETER = 1.0f; // lambda = 1.0;
+	const float INPUT_DAMPING = 1.0f; // R
 
 	void Start()
 	{
 		initialPosition = body.position;
 	}
 
-	// Wave variables control algorithm based on 2004 paper by Niemeyer and Slotline
+	// Wave variables control algorithm with impedance matching between dynamical system and b (wave impedance) parameter
+	// Please refer to section 7 of 2004 paper by Niemeyer and Slotline for more details
 	void FixedUpdate()
 	{
+		float outputDamping = TUNNING_PARAMETER * body.mass; // D = lamda * m
+		float proportionalGain = TUNNING_PARAMETER * TUNNING_PARAMETER * body.mass; // K = lamda^2 * m
+		float derivativeGain = TUNNING_PARAMETER * body.mass; // B = lamda * m
+
+		float waveImpedance = INPUT_DAMPING + TUNNING_PARAMETER * body.mass; // b = R + lamda * m
+
 		// Receive v_m (delayed v_s) and V_m (delayed V_s)
 		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
 		//float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
@@ -20,19 +30,25 @@ public class ForceMasterController : Controller
 		if( inputWaveVariable == 0.0 ) body.constraints |= RigidbodyConstraints.FreezePositionZ;
 		else body.constraints &= (~RigidbodyConstraints.FreezePositionZ);
 
-		// F_m = b * x_dot_m - sqrt(2 * b) * v_m
-		inputForce = Controller.WaveImpedance * body.velocity.z - Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveVariable;
-		// p_m = b * x_m - sqrt(2 * b) * V_m
-		//float inputForceIntegral = Controller.WaveImpedance * body.position.z - Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveIntegral;
+		// x_dot_m = (sqrt(2*b) * v_m + F_m) / b
+		float inputVelocity = ( Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveVariable + outputForce ) / waveImpedance;
+		// should be inputVelocity = inputVelocity / inertia_scaling_factor
+		// x_m = (sqrt(2*b) * V_m + p_m) / b
+		//inputPosition = ( Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveIntegral - outputForceIntegral ) / waveImpedance;
 
-		//Debug.Log( string.Format( "force: {0} - force integral: {1}", inputForce, inputForceIntegral ) );
+		inputPosition += inputVelocity * Time.fixedDeltaTime;
+		float positionError = -inputPosition + body.position.z;
+		float velocityError = -inputVelocity + body.velocity.z;
+		outputForce = proportionalGain * positionError + derivativeGain * velocityError;
+		outputForce -= INPUT_DAMPING * inputVelocity;
 
-		body.AddForce( Vector3.forward * inputForce, ForceMode.Force );
+		float controlForce = outputForce + outputDamping * body.velocity.z;
+		body.AddForce( - Vector3.forward * controlForce, ForceMode.Force );
 
 		// u_m = sqrt(2 * b) * x_dot_m - v_m
-		float outputWaveVariable = Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * body.velocity.z - inputWaveVariable;
+		float outputWaveVariable = Mathf.Sqrt( 2.0f * waveImpedance ) * inputVelocity - inputWaveVariable;
 		// U_m = sqrt(2 * b) * x_m - V_m
-		//float outputWaveIntegral = Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * body.position.z - inputWaveIntegral;
+		//float outputWaveIntegral = Mathf.Sqrt( 2.0f * waveImpedance ) * inputPosition - inputWaveIntegral;
 
 		// Send u_m and U_m
 		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE, outputWaveVariable );
@@ -43,7 +59,7 @@ public class ForceMasterController : Controller
 		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, VELOCITY, body.velocity.z );
 	}
 		
-	public float GetInputForce() { return inputForce; }
+	public float GetOutputForce() { return outputForce; }
 
 	public float GetPosition() { return body.position.z; }
 }

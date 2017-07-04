@@ -15,7 +15,6 @@ public class Configuration : MonoBehaviour
 
 	public InputField axisServerEntry, gameServerEntry;
 
-	public Toggle setpointToggle;
 	public Slider calibrationSlider;
 	public Text valueDisplay;
 
@@ -147,7 +146,6 @@ public class Configuration : MonoBehaviour
 	{
 		calibratedVariable = (AxisVariable) variableIndex;
 		if( controlAxis != null ) AdjustSlider();
-		setpointToggle.isOn = false;
 	}
 
 	public void InvertCalibration()

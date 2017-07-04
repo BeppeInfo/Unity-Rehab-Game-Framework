@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44659358, g: 0.49642956, b: 0.5748247, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641222, b: 0.57481694, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -655,7 +655,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 2}
-  m_SizeDelta: {x: 0, y: 150}
+  m_SizeDelta: {x: 0, y: 200}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &313152954
 MonoBehaviour:
@@ -4258,6 +4258,8 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: Acceleration
       m_Image: {fileID: 0}
+    - m_Text: Inertia
+      m_Image: {fileID: 0}
     - m_Text: Stiffness
       m_Image: {fileID: 0}
     - m_Text: Damping
@@ -5477,7 +5479,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   axisServerEntry: {fileID: 261171922}
   gameServerEntry: {fileID: 1656935296}
-  setpointToggle: {fileID: 0}
   calibrationSlider: {fileID: 2027867726}
   valueDisplay: {fileID: 761448293}
   axisSelector: {fileID: 1646901575}
