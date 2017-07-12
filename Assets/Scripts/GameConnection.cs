@@ -77,9 +77,15 @@ public abstract class GameConnection
 	{
 		KeyValuePair<byte,byte> remoteKey = new KeyValuePair<byte,byte>( objectID, valueType );
 
-		if( remoteValues.ContainsKey( remoteKey ) ) return remoteValues[ remoteKey ][ valueIndex ];
+		float remoteValue = 0.0f;
 
-		return 0.0f;
+		if( remoteValues.ContainsKey( remoteKey ) ) 
+		{
+			remoteValue = remoteValues[ remoteKey ][ valueIndex ];
+			remoteValues[ remoteKey ][ valueIndex ] = 0.0f;
+		}
+
+		return remoteValue;
 	}
 
 	public void UpdateData( float updateTime )

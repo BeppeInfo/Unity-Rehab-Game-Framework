@@ -60,7 +60,7 @@ public class Configuration : MonoBehaviour
 		}
 
 		if( ! calibrationSlider.interactable ) calibrationSlider.value = currentAbsoluteValue;
-		valueDisplay.text = currentAbsoluteValue.ToString( "+#0.000;-#0.000; #0.000" );
+		valueDisplay.text = currentAbsoluteValue.ToString( "+#0.00000;-#0.00000; #0.00000" );
 	}
 
 	public void SetAxisServer( string serverHost )

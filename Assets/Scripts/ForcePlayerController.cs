@@ -3,66 +3,49 @@ using UnityEngine.UI;
 
 public class ForcePlayerController : Controller
 {
-	const float TUNNING_PARAMETER = 1.0f; // lambda = 1.0;
-	const float INPUT_DAMPING = 1.0f; // R
-
 	private InputAxis controlAxis = null;
 
-	private float inputVelocity = 0.0f, inputPosition = 0.0f;
-	private float outputForce = 0.0f, outputForceIntegral = 0.0f;
+	private float playerForce = 0.0f, remoteForce = 0.0f, remoteForceIntegral = 0.0f;
+
+	private float waveImpedance = 1.0f, inputWaveVariable = 0.0f, inputWaveIntegral = 0.0f;
 
 	void Start()
 	{
 		initialPosition = body.position;
 	}
 
-	// Wave variables control algorithm with impedance matching between dynamical system and b (wave impedance) parameter
+	// Wave variables control algorithm with wave filtering
 	// Please refer to section 7 of 2004 paper by Niemeyer and Slotline for more details
 	void FixedUpdate()
 	{
-		float waveImpedance = INPUT_DAMPING + TUNNING_PARAMETER * body.mass; // b = R + lamda * m
+		// Get total delay between received wave values
+		float networkDelay = GameManager.GetConnection().GetNetworkDelay( (byte) elementID );
+		float waveDelay = networkDelay + Time.fixedDeltaTime;
 
-		// Receive u_s (delayed u_m) and U_s (delayed U_m)
-		float inputWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
-		//float inputWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
-
+		float scalingFactor = 1.0f;//body.mass / controlAxis.GetValue( AxisVariable.INERTIA );
 		// Read scaled player force (F_s) value
-		float playerForce = transform.forward.z * controlAxis.GetValue( AxisVariable.FORCE ) * body.mass / controlAxis.GetValue( AxisVariable.INERTIA );
-		// Convert from player input force to wave transformation output force (simple copy for now)
-		outputForce = playerForce + TUNNING_PARAMETER * body.velocity.z;
-        // Integrate force for moment (p_s) calculation
-        //outputForceIntegral += outputForce * Time.fixedDeltaTime;
+		playerForce = transform.forward.z * controlAxis.GetValue( AxisVariable.FORCE ) * scalingFactor;
+		// Extract remote force from wave variable: F_s = sqrt( 2 * b ) * u_s - b * xdot_s
+		remoteForce = Mathf.Sqrt( 2 * waveImpedance ) * inputWaveVariable - waveImpedance * body.velocity.z;
+		//remoteForceIntegral = Mathf.Sqrt( 2 * waveImpedance ) * inputWaveIntegral - waveImpedance * body.position.z;
 
-        // x_dot_s = (sqrt(2*b) * u_s - F_s) / b
-		inputVelocity = ( Mathf.Sqrt( 2.0f * waveImpedance ) * inputWaveVariable - outputForce ) / waveImpedance;
-		// should be inputVelocity = inputVelocity / inertia_scaling_factor
-		// x_s = (sqrt(2*b) * U_s - p_s) / b
-		//inputPosition = ( Mathf.Sqrt( 2.0f * Controller.WaveImpedance ) * inputWaveIntegral - outputForceIntegral ) / Controller.WaveImpedance;
+		// Apply resulting force to rigid body
+		body.AddForce( Vector3.forward * ( playerForce + remoteForce ), ForceMode.Force );
 
-		// Begin updating local movement if client started receiving messages
-		if( inputWaveVariable != 0.0f ) 
-		{
-			// Convert from wave transformation input velocity to player output velocity (simple copy for now)
-			float playerVelocity = inputVelocity;
-			// Apply velocity to player's body as a 3D vector
-			body.velocity = Vector3.forward * playerVelocity;
-			// Add drift correction proportional to position tracking error
-			//body.velocity = Vector3.forward * ( DRIFT_CORRECTION_GAIN * ( inputPosition - body.position.z ) );
-		}
+		// Receive delayed u_m and U_m
+		float delayedWaveVariable = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE );
+		//float delayedWaveIntegral = GameManager.GetConnection().GetRemoteValue( (byte) elementID, Z, WAVE_INTEGRAL );
 
-        // Set robot position and velocity setpoints (relative to initial axis/body position and normalized by scenario dimensions)
-		//float relativeSetpoint = ( body.position.z - initialPosition.z ) / rangeLimits.z / transform.forward.z;
-		//controlAxis.SetScaledValue( AxisVariable.POSITION, Mathf.Clamp( relativeSetpoint, -1.0f, 1.0f ) );
-		controlAxis.SetValue( AxisVariable.VELOCITY, inputVelocity * controlAxis.GetValue( AxisVariable.INERTIA ) / body.mass );
+		// Wave filtering:
+		// Calculate wave derivative: udot_s = ( u_m_old - u_s ) / delay
+		float inputWaveDerivative = ( delayedWaveVariable - inputWaveVariable ) / waveDelay;
+		// Calculate next wave value: u_s = u_s + udot_s * dt
+		inputWaveVariable += inputWaveDerivative * Time.fixedDeltaTime;
 
-		// Set impedance matching control K (lamda^2 * M) and B,D (lamda * M) parameters
-		controlAxis.SetValue( AxisVariable.STIFFNESS, TUNNING_PARAMETER * TUNNING_PARAMETER * controlAxis.GetValue( AxisVariable.INERTIA ) );
-		controlAxis.SetValue( AxisVariable.DAMPING, TUNNING_PARAMETER * controlAxis.GetValue( AxisVariable.INERTIA ) );
-
-        // v_s = sqrt(2 * b) * x_dot_s - u_s
-		float outputWaveVariable = Mathf.Sqrt( 2.0f * waveImpedance ) * inputVelocity - inputWaveVariable;
-		// V_s = sqrt(2 * b) * x_s - V_s
-		//float outputWaveIntegral = Mathf.Sqrt( 2.0f * waveImpedance ) * body.position.z - inputWaveIntegral;
+		// v_s = ( b * x_dot_s - F_s ) / sqrt(2 * b)
+		float outputWaveVariable = ( waveImpedance * body.velocity.z - remoteForce ) / Mathf.Sqrt( 2.0f * waveImpedance );
+		// V_s = ( b * x_s - p_s ) / sqrt(2 * b)
+		//float outputWaveIntegral = ( waveImpedance * body.position.z - remoteForceIntegral ) / Mathf.Sqrt( 2.0f * waveImpedance );
 
         // Send v_s and V_s
 		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE, outputWaveVariable );
@@ -80,11 +63,11 @@ public class ForcePlayerController : Controller
 		GameManager.GetConnection().SetLocalValue( (byte) elementID, Z, WAVE_INTEGRAL, 0.0f );
 	}
 
-	public float GetOutputForce() { return outputForce; }
+	public float GetInputForce() { return ( playerForce + remoteForce ); }
+	public float GetPlayerForce() { return playerForce; }
+	public float GetRemoteForce() { return remoteForce; }
 	public float GetRelativePosition() { return body.position.z - initialPosition.z; }
 	public float GetAbsolutePosition() { return body.position.z; }
-	public float GetInputPosition() { return inputPosition; }
-	public float GetInputVelocity() { return inputVelocity; }
 	public float GetVelocity() { return body.velocity.z; }
 
 	public void SetHelperStiffness( float value ){ if( controlAxis != null ) controlAxis.SetValue( AxisVariable.STIFFNESS, value ); }

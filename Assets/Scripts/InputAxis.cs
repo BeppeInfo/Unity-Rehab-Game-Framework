@@ -16,8 +16,8 @@ public class InputAxis
 	protected class InputAxisValue
 	{
 		public float current = 0.0f, setpoint = 0.0f;
-		public float min = Mathf.NegativeInfinity, max = Mathf.Infinity;
-		public float range = Mathf.Infinity;
+		public float min = /*Mathf.NegativeInfinity*/0.0f, max = /*Mathf.Infinity*/0.0f;
+		public float range = 1.0f;/*Mathf.Infinity;*/
 		public float offset = 0.0f;
 	}
 
@@ -41,8 +41,8 @@ public class InputAxis
 
 		foreach( InputAxisValue value in inputValues )
 		{
-			value.min = Mathf.NegativeInfinity;
-			value.max = Mathf.Infinity;
+			value.min = 0.0f;//Mathf.NegativeInfinity;
+			value.max = 0.0f;//Mathf.Infinity;
 			value.offset = 0.0f;
 		}
 	}
@@ -53,7 +53,7 @@ public class InputAxis
 	public void SetValue( AxisVariable variable, float value ) 
 	{ 
 		value += inputValues[ (int) variable ].offset;
-		value = Mathf.Clamp( value, inputValues[ (int) variable ].min, inputValues[ (int) variable ].max );
+		//value = Mathf.Clamp( value, inputValues[ (int) variable ].min, inputValues[ (int) variable ].max );
 		inputValues[ (int) variable ].setpoint = value;
 	}
 
