@@ -54,6 +54,7 @@
      <Compile Include="Assets\Scripts\DoublePongClient.cs" />
      <Compile Include="Assets\Scripts\DoublePongServer.cs" />
      <Compile Include="Assets\Scripts\ForceArrowScaler.cs" />
+     <Compile Include="Assets\Scripts\ForceController.cs" />
      <Compile Include="Assets\Scripts\ForceMasterController.cs" />
      <Compile Include="Assets\Scripts\ForcePlayerController.cs" />
      <Compile Include="Assets\Scripts\GameClientConnection.cs" />

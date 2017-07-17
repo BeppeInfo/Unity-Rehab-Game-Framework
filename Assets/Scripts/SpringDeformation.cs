@@ -6,6 +6,8 @@ public class SpringDeformation : MonoBehaviour
 {
 	public SpringJoint springJoint;
 
+	public float springStiffness, springDamping;
+
 	public ForceMasterController topController, bottomController;
 
 	private float baseSpringLength = 1.0f;
@@ -16,7 +18,16 @@ public class SpringDeformation : MonoBehaviour
 		baseSpringLength = topController.transform.position.z - bottomController.transform.position.z;
 		baseScale = transform.localScale;
 
-		if( ! GameManager.isMaster ) springJoint.spring = springJoint.damper = 0.0f;
+		if( GameManager.isMaster ) 
+		{
+			springJoint.spring = springStiffness;
+			springJoint.damper = springDamping;
+		}
+		else
+		{
+			springJoint.spring = 0.0f;
+			springJoint.damper = 0.0f;
+		}
 	}
 	
 	void Update() 

@@ -8,11 +8,13 @@ public class BoxClashClient : GameClient
 {
 	public Controller[] boxes = new Controller[ 2 ];
 
-	public SpringJoint boxesSpringJoint;
-
 	private ForcePlayerController player = null;
 
+	public Text waveImpedanceText, filterStrengthText;
+
 	private int clientID = -1;
+
+	private IEnumerator logCoroutine;
 
 	void Awake()
 	{
@@ -25,8 +27,7 @@ public class BoxClashClient : GameClient
 	{
 		base.Start();
 
-		boxesSpringJoint.spring = 0.0f;
-		boxesSpringJoint.damper = 0.0f;
+		logCoroutine = RegisterValues();
 	}
 
 	public override void FixedUpdate()
@@ -39,16 +40,19 @@ public class BoxClashClient : GameClient
 		//else if( error >= PositionPositionPlayerController.ERROR_THRESHOLD ) sliderHandle.color = Color.yellow;
 		//else sliderHandle.color = Color.green;
 
-		localPlayerText.text = string.Format( "Force:{0:+#0.0000;-#0.0000; #0.0000}N\n({1:+#0.0000;-#0.0000; #0.0000}N)", player.GetRemoteForce(), player.GetPlayerForce() );
+		localPlayerText.text = string.Format( "Force:{0:+#0.00000;-#0.00000; #0.00000}N", player.GetRemoteForce() );
 		remotePlayerText.text = string.Format( "Position:{0:+#0.0000;-#0.0000; #0.0000} ({1:+#0.0000;-#0.0000; #0.0000})\nVelocity:{2:+#0.0000;-#0.0000; #0.0000}", 
 			                                   player.GetRelativePosition(), player.GetAbsolutePosition(), player.GetVelocity() );
+
+		waveImpedanceText.text = player.GetWaveImpedance().ToString( "0.000" );
+		filterStrengthText.text = player.GetFilteringStrength().ToString( "0.000" );
 	}
 
 	IEnumerator RegisterValues()
 	{
 		// Set log file names
-		StreamWriter boxLog = new StreamWriter( "./box" + clientID.ToString() + ".log", false );
-		StreamWriter networkLog = new StreamWriter( "./network" + clientID.ToString() + ".log", false );
+		StreamWriter boxLog = new StreamWriter( "./box_client" + clientID.ToString() + ".log", false );
+		StreamWriter networkLog = new StreamWriter( "./network_client" + clientID.ToString() + ".log", false );
 
 		while( Application.isPlaying )
 		{
@@ -58,9 +62,8 @@ public class BoxClashClient : GameClient
 				currentConnectionInfo.sentPackets, currentConnectionInfo.receivedPackets, currentConnectionInfo.lostPackets, currentConnectionInfo.rtt );
 
 			double gameTime = DateTime.Now.TimeOfDay.TotalSeconds;
-			boxLog.WriteLine( string.Format( "{0}\t{1}\t{2}\t{3}\t{4}", gameTime, player.GetPlayerForce(), player.GetRemoteForce(), player.GetAbsolutePosition(), player.GetVelocity() ) );
-				                                                                            
-			networkLog.WriteLine( string.Format( "{0}\t{1}", gameTime, currentConnectionInfo.rtt / 2.0f ) );
+			boxLog.WriteLine( string.Format( "{0}\t{1}\t{2}\t{3}", gameTime, player.GetAbsolutePosition(), player.GetVelocity(), player.GetRemoteForce() ) );                            
+			networkLog.WriteLine( string.Format( "{0}\t{1}\t{2}\t{3}", gameTime, currentConnectionInfo.rtt / 2.0f, player.GetWaveImpedance(), player.GetFilteringStrength() ) );
 
 			yield return new WaitForFixedUpdate();
 		}
@@ -91,7 +94,7 @@ public class BoxClashClient : GameClient
 			gameCamera.transform.RotateAround( transform.position, Vector3.up, 180.0f );
 		}
 
-		StartCoroutine( RegisterValues() );
+		StartCoroutine( logCoroutine );
 	}
 
 	public void StartPlay()
@@ -106,5 +109,7 @@ public class BoxClashClient : GameClient
 	public void StopPlay()
 	{
 		boxes[ 0 ].enabled = boxes[ 1 ].enabled = false;
+
+		StopCoroutine( logCoroutine );
 	}
 }

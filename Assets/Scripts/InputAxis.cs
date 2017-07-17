@@ -64,15 +64,15 @@ public class InputAxis
 	} 
 	public void SetScaledValue( AxisVariable variable, float scaledValue ) { SetValue( variable, scaledValue * inputValues[ (int) variable ].range / scale ); }
 
-	public float GetAxisScale() { return scale; } 
-	public void SetAxisScale( float newScale )
+	public float GetScale() { return scale; } 
+	public void SetScale( float newScale )
 	{
 		if( Mathf.Approximately( newScale, 0.0f ) ) scale = 1.0f;
 		else scale = newScale;
 	}
 
-	public float GetMinValue( AxisVariable variable ) { return inputValues[ (int) variable ].min; }
-	public float GetMaxValue( AxisVariable variable ) { return inputValues[ (int) variable ].max; }
+	public float GetValueMin( AxisVariable variable ) { return inputValues[ (int) variable ].min; }
+	public float GetValueMax( AxisVariable variable ) { return inputValues[ (int) variable ].max; }
 
 	public void AdjustRange() 
 	{
